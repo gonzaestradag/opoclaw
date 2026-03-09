@@ -930,6 +930,66 @@ The sections that matter most:
 
 ---
 
+---
+
+## Multi-agent team (optional)
+
+ClaudeClaw ships with a full multi-agent system. Instead of one assistant doing everything, you build a company: a CEO assistant that talks to you on Telegram, directors that own departments, and workers that execute tasks autonomously in the background.
+
+Everything is visible on the [full web dashboard](docs/DASHBOARD.md).
+
+### How it works
+
+```
+You → Telegram → Your Assistant (CLAUDE.md)
+                       ↓  delegates
+                  Agent Worker polls DB
+                       ↓  runs
+                  Claude with agent persona + task description
+                       ↓  logs
+                  Live progress on dashboard
+                       ↓  notifies
+                  Telegram message when done
+```
+
+### Start the agent worker
+
+```bash
+npm run build
+
+# Run once
+node dist/agent-worker.js
+
+# Or always-on with PM2
+pm2 start dist/agent-worker.js --name agent-worker
+pm2 save
+```
+
+### Build your team
+
+Your team is defined in `agents/company.js`. It ships with a complete example — rename the agents, change their models and personalities, restructure departments. Make it yours.
+
+Each agent needs an ID, name, title, department, model, and personality. The personality block actually changes how the agent reasons and writes — be specific.
+
+After editing the file, register agents in the database. Ask your assistant from Telegram:
+```
+Register my full agent team from agents/company.js into the database
+```
+
+### Dashboard
+
+The full dashboard (20+ pages) gives you live visibility into the whole team: task board with live progress bars, activity feed, inter-agent messages, costs per agent, trading, revenue, and more.
+
+→ **[Full dashboard pages reference](docs/DASHBOARD.md)**
+
+### Full agent guide
+
+→ **[Building your agent team](docs/AGENTS.md)**
+
+Covers: team structure, agent definitions, model selection, registering in DB, task delegation, auto-hiring, personality design, cost control, and troubleshooting.
+
+---
+
 ## Customizing the ASCII art
 
 The startup banner is in `banner.txt` at the project root. Replace it with anything or leave it empty. It's read fresh on every start.
@@ -1172,49 +1232,69 @@ claudeclaw/
 │
 │  ← Bot source code (src/)
 ├── src/
-│   ├── index.ts          Main entrypoint — starts everything
-│   ├── bot.ts            Handles all Telegram messages (text, voice, photo, etc.)
-│   ├── agent.ts          Runs Claude Code — the core integration
-│   ├── db.ts             SQLite database — all tables and queries
-│   ├── memory.ts         Memory saving, searching, and decay logic
-│   ├── scheduler.ts      Cron task runner — fires tasks every 60 seconds
-│   ├── voice.ts          Voice transcription (Groq) and synthesis (ElevenLabs)
-│   ├── media.ts          Downloads files from Telegram, cleans up after 24h
-│   ├── slack.ts           Slack API client (conversations, messages, send)
-│   ├── slack-cli.ts       CLI wrapper for Slack (used by the slack skill)
-│   ├── whatsapp.ts        WhatsApp client via whatsapp-web.js
-│   ├── dashboard.ts       Web dashboard server (Hono + API routes + token auth)
-│   ├── dashboard-html.ts  Dashboard HTML/CSS/JS (Tailwind + Chart.js, no build step)
-│   ├── config.ts          Reads .env safely (never pollutes process.env)
-│   ├── env.ts             Low-level .env file parser
-│   └── schedule-cli.ts    CLI tool for managing scheduled tasks
+│   ├── index.ts              Main entrypoint — starts everything
+│   ├── bot.ts                Handles all Telegram messages (text, voice, photo, etc.)
+│   ├── agent.ts              Runs Claude Code — the core integration
+│   ├── agent-worker.ts       Multi-agent task worker — polls DB, runs agent personas
+│   ├── db.ts                 SQLite database — all tables and queries
+│   ├── memory.ts             Memory saving, searching, and decay logic
+│   ├── scheduler.ts          Cron task runner — fires tasks every 60 seconds
+│   ├── voice.ts              Voice transcription (Groq) and synthesis (ElevenLabs)
+│   ├── media.ts              Downloads files from Telegram, cleans up after 24h
+│   ├── slack.ts              Slack API client (conversations, messages, send)
+│   ├── slack-cli.ts          CLI wrapper for Slack (used by the slack skill)
+│   ├── whatsapp.ts           WhatsApp client via whatsapp-web.js
+│   ├── dashboard-server.ts   Full dashboard API server (Express + SSE)
+│   ├── config.ts             Reads .env safely (never pollutes process.env)
+│   ├── env.ts                Low-level .env file parser
+│   └── schedule-cli.ts       CLI tool for managing scheduled tasks
+│
+│  ← Full web dashboard (React/Vite — optional)
+├── dashboard/
+│   ├── src/
+│   │   ├── pages/            20+ pages: Home, MyDay, Agents, Tasks, Inbox, Finance...
+│   │   ├── components/       Reusable UI components
+│   │   └── lib/              API client, utilities
+│   └── package.json          Dashboard dependencies (run: cd dashboard && npm install)
+│
+│  ← Agent team definition
+├── agents/
+│   └── company.js            Your company structure — agents, departments, org chart
+│
+│  ← Documentation
+├── docs/
+│   ├── AGENTS.md             Full guide: building your agent team
+│   └── DASHBOARD.md          Dashboard pages reference
 │
 │  ← Skills (copy to ~/.claude/skills/ to activate)
 ├── skills/
-│   ├── gmail/SKILL.md     Gmail inbox management
-│   ├── google-calendar/   Calendar events, invites, availability
-│   └── slack/SKILL.md     Slack conversations and messages
+│   ├── gmail/SKILL.md        Gmail inbox management
+│   ├── google-calendar/      Calendar events, invites, availability
+│   └── slack/SKILL.md        Slack conversations and messages
 │
 │  ← Scripts (scripts/)
 ├── scripts/
-│   ├── setup.ts          Interactive setup wizard — run with: npm run setup
-│   ├── status.ts         Health check — run with: npm run status
-│   ├── notify.sh         Sends a Telegram message from the shell (used by Claude)
-│   └── wa-daemon.ts      WhatsApp daemon — run separately for WhatsApp bridge
+│   ├── setup.ts              Interactive setup wizard — run with: npm run setup
+│   ├── status.ts             Health check — run with: npm run status
+│   ├── notify.sh             Sends a Telegram message from the shell (used by Claude)
+│   └── wa-daemon.ts          WhatsApp daemon — run separately for WhatsApp bridge
 │
 │  ← Runtime data (auto-created, gitignored)
 ├── store/
-│   ├── claudeclaw.db     SQLite database — created automatically on first run
-│   ├── claudeclaw.pid    Tracks the running process to prevent duplicates
-│   └── waweb/            WhatsApp session — scan QR once, persists here
+│   ├── claudeclaw.db         SQLite database — created automatically on first run
+│   ├── claudeclaw.pid        Tracks the running process to prevent duplicates
+│   └── waweb/                WhatsApp session — scan QR once, persists here
 │
 └── workspace/
-    └── uploads/          Telegram media downloads — auto-deleted after 24 hours
+    └── uploads/              Telegram media downloads — auto-deleted after 24 hours
 ```
 
 **The only files you need to edit to get started:**
 1. `CLAUDE.md` — fill in your name, what you do, your file paths, your skills
 2. `.env` — add your API keys (the setup wizard does this for you)
+
+**Optional — multi-agent team:**
+3. `agents/company.js` — customize your team (names, roles, models, personalities)
 
 Everything else runs without modification.
 
