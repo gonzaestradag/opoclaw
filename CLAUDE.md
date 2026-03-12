@@ -230,7 +230,7 @@ curl -s -X POST http://localhost:3001/api/agent-messages \
 # /Users/opoclaw1/claudeclaw/workspace/org-chart.md
 
 # STEP 4 — Log activity
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('thorn','Thorn','🌵','Hired [Full Name] — [Title]','success','executive',datetime('now'))"
 
 # STEP 5 — Generate cinematic portrait and send to Telegram
@@ -291,7 +291,7 @@ message_type options: `message` | `question` | `answer` | `idea` | `hire`
 
 When you complete a task (or a sub-agent does), log it to the activity feed:
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, created_at) VALUES ('thorn', 'Thorn', '🌵', 'DESCRIPTION OF WHAT WAS DONE', 'success', 'executive', datetime('now'))"
 ```
 Types: `info` | `success` | `warning` | `error` | `task`
@@ -348,14 +348,14 @@ DASHBOARD LOGGING — mandatory at every step:
 curl -s -X POST http://localhost:3001/api/agent-messages \
   -H "Content-Type: application/json" \
   -d '{"thread_id":"TASK_ID","from_agent_id":"AGENT_ID","from_agent_name":"NAME","from_agent_emoji":"EMOJI","message":"Iniciando: [what you are about to do]","message_type":"message"}'
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('AGENT_ID','NAME','EMOJI','Iniciando: [what you are about to do]','info','DEPARTMENT',datetime('now'))"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('AGENT_ID','NAME','EMOJI','Iniciando: [what you are about to do]','info','DEPARTMENT',datetime('now'))"
 curl -s -X PATCH http://localhost:3001/api/tasks/TASK_ID -H "Content-Type: application/json" -d '{"status":"in_progress","progress":10}'
 
 # After each major step (searching, reading, writing, calling API, etc.):
 curl -s -X POST http://localhost:3001/api/agent-messages \
   -H "Content-Type: application/json" \
   -d '{"thread_id":"TASK_ID","from_agent_id":"AGENT_ID","from_agent_name":"NAME","from_agent_emoji":"EMOJI","message":"[what you just completed, plain language]","message_type":"message"}'
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('AGENT_ID','NAME','EMOJI','[what you just completed]','info','DEPARTMENT',datetime('now'))"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('AGENT_ID','NAME','EMOJI','[what you just completed]','info','DEPARTMENT',datetime('now'))"
 curl -s -X PATCH http://localhost:3001/api/tasks/TASK_ID -H "Content-Type: application/json" -d '{"progress":50}'
 # Increase progress: 10 → 25 → 50 → 75 → 100 as you advance
 
@@ -363,7 +363,7 @@ curl -s -X PATCH http://localhost:3001/api/tasks/TASK_ID -H "Content-Type: appli
 curl -s -X POST http://localhost:3001/api/agent-messages \
   -H "Content-Type: application/json" \
   -d '{"thread_id":"TASK_ID","from_agent_id":"AGENT_ID","from_agent_name":"NAME","from_agent_emoji":"EMOJI","message":"Listo: [one-line summary of what was accomplished]","message_type":"answer"}'
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('AGENT_ID','NAME','EMOJI','Listo: [summary]','success','DEPARTMENT',datetime('now'))"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('AGENT_ID','NAME','EMOJI','Listo: [summary]','success','DEPARTMENT',datetime('now'))"
 curl -s -X PATCH http://localhost:3001/api/tasks/TASK_ID -H "Content-Type: application/json" -d '{"status":"done","progress":100}'
 ```
 
@@ -424,7 +424,7 @@ This is the most common failure mode: Gonzalo says "cámbialo" and Thorn writes 
 
 ## Auth — Cuenta Claude de Gonzalo (NO API key)
 
-**ClaudeClaw corre 100% via la cuenta Claude de Gonzalo, autenticada con OAuth.**
+**OpoClaw corre 100% via la cuenta Claude de Gonzalo, autenticada con OAuth.**
 
 - Auth via `claude login` — el SDK encuentra las credenciales en `~/.claude/` automaticamente
 - **NUNCA definir `ANTHROPIC_API_KEY` en el `.env`** — si esta definido, toma precedencia sobre OAuth y tiene su propio balance de creditos separado (causa errores "Credit balance is too low")
@@ -533,15 +533,15 @@ market_signal.json contiene:
 
 Cuando se quiera integrar, clonar, o inspirarse en otro proyecto para potenciar OpoClaw:
 
-> **Adaptar a ClaudeClaw, nunca al reves.**
+> **Adaptar a OpoClaw, nunca al reves.**
 
 Reglas concretas:
 - Toda logica nueva debe integrarse en la estructura existente de `/Users/opoclaw1/claudeclaw`
 - Auth siempre via OAuth de la cuenta Claude — no introducir API keys de Anthropic
-- DB siempre SQLite en `/Users/opoclaw1/claudeclaw/store/claudeclaw.db` — no crear DBs paralelas
+- DB siempre SQLite en `/Users/opoclaw1/claudeclaw/store/opoclaw.db` — no crear DBs paralelas
 - Agentes nuevos siguen el flujo de `agent.ts` / `agent-worker.ts` — no correr claude CLI por separado
 - Dashboard changes van en `/Users/opoclaw1/claudeclaw/dashboard/` y requieren `deploy-dashboard.sh`
-- Si el proyecto externo tiene una feature util, se extrae la logica y se reimplementa dentro de ClaudeClaw
+- Si el proyecto externo tiene una feature util, se extrae la logica y se reimplementa dentro de OpoClaw
 - Si tiene dependencias incompatibles, se adapta — no se fuerza la arquitectura del proyecto externo sobre la nuestra
 
 ## Your Environment
@@ -619,7 +619,7 @@ When any agent identifies a bottleneck or missing capability, they MUST propose 
 
 **Check for duplicates first:**
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT * FROM skill_proposals WHERE skill_slug='your-skill-slug';"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "SELECT * FROM skill_proposals WHERE skill_slug='your-skill-slug';"
 ```
 
 **If no duplicate, propose it:**
@@ -679,7 +679,7 @@ Example: Gonzalo says "mándale un audio a papá diciéndole que llegamos a las 
 **Contact message history — log every send:**
 After every message sent to a contact (Telegram audio, email, or text), log it:
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO contact_messages (contact_name, contact_username, channel, message_text) VALUES ('Papá', '@Chalo', 'telegram', 'mensaje aqui');"
 ```
 This lets Thorn know "la última vez que le mandaste algo a papá fue hace X días".
@@ -709,7 +709,7 @@ When Gonzalo says "guarda a [name]" or "agrega a [name]" or gives you someone's 
 - Thorn updates the record and confirms.
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO people (name, relation, telegram_username, telegram_chat_id, email, phone, whatsapp, notes)
    VALUES ('Name', 'friend/colleague/client/etc', '@username', NULL, 'email@x.com', '+52...', '+52...', 'notes');"
 # To update a field later:
@@ -720,7 +720,7 @@ sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
 
 **Looking up a contact:**
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "SELECT name, telegram_username, telegram_chat_id, email, phone, whatsapp FROM people WHERE name LIKE '%Name%' COLLATE NOCASE LIMIT 3;"
 ```
 
@@ -851,7 +851,7 @@ Helper script: `bash /Users/opoclaw1/claudeclaw/scripts/brain-save.sh /path/to/f
 When saving a new version of an existing document (v2, v3, updated report, etc.), delete all previous versions from Brain before saving the new one:
 ```bash
 # Delete old versions from DB and filesystem before saving new one
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "DELETE FROM brain_files WHERE name LIKE 'document-name-pattern%' AND name != 'new-version-filename.pdf';"
 rm -f /Users/opoclaw1/claudeclaw/workspace/brain/FolderName/old-version*.pdf
 # Then save the new version
@@ -904,10 +904,10 @@ You maintain context between messages via Claude Code session resumption. You do
 
 ### `convolife`
 When Gonzalo says "convolife", check the remaining context window and report back. Steps:
-1. Get the current session ID: `sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT session_id FROM sessions LIMIT 1;"`
+1. Get the current session ID: `sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "SELECT session_id FROM sessions LIMIT 1;"`
 2. Query the token_usage table:
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "
   SELECT
     COUNT(*)             as turns,
     MAX(context_tokens)  as last_context,
@@ -928,12 +928,12 @@ Turns: N | Compactions: N | Cost: $X.XX
 ### `checkpoint`
 When Gonzalo says "checkpoint", save a TLDR to SQLite so it survives a /newchat reset. Steps:
 1. Write a tight 3-5 bullet summary of key things discussed/decided
-2. Get chat_id: `sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT chat_id FROM sessions LIMIT 1;"`
+2. Get chat_id: `sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "SELECT chat_id FROM sessions LIMIT 1;"`
 3. Insert as high-salience semantic memory:
 ```bash
 python3 -c "
 import sqlite3, time
-db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/claudeclaw.db')
+db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/opoclaw.db')
 now = int(time.time())
 summary = '''[SUMMARY HERE]'''
 db.execute('INSERT INTO memories (chat_id, content, sector, salience, created_at, accessed_at) VALUES (?, ?, ?, ?, ?, ?)',

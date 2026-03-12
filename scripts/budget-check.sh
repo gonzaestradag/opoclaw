@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 SCRIPT_DIR="$(dirname "$0")"
 
 # Load env for Telegram

@@ -56,7 +56,7 @@ while true; do
     bash "$NOTIFY_SCRIPT" "IP activado. Trading bot arrancado. Balance: \$${USDT_BAL} USDT. Estrategia RSI en ADA/USDT y VET/USDT corriendo 24/7."
 
     # Log to dashboard
-    sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+    sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
       "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('trading-bot','Trading Bot','📈','Trading bot activado — IP whitelisted. Balance: \$${USDT_BAL} USDT','success','ventures',datetime('now'))"
 
     # Self-terminate watchdog

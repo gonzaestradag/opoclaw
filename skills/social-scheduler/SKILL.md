@@ -71,6 +71,6 @@ Before publishing any content, run it through the `humanize` skill to strip AI p
 ## Log activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('sofia-ramos','Sofia','📚','Scheduled social media content','success','content',datetime('now'))"
 ```

@@ -2,7 +2,7 @@
 # daily-pl-report.sh — Reporte diario P&L via Telegram
 # Corre a las 8pm todos los dias via scheduled_tasks
 
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 ENV_FILE="/Users/opoclaw1/claudeclaw/.env"
 
 # Load env vars safely (grep instead of source to avoid pipefail issues)

@@ -38,7 +38,7 @@ Given the agent's output, check it against criteria:
 # Example: verify a file was created
 ls -la [expected file path]
 # verify DB record exists
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT * FROM agent_activity WHERE agent_id='[id]' AND created_at > datetime('now','-5 minutes');"
 # verify API returned success
 curl -s http://localhost:3001/api/agents/[id] | python3 -m json.tool

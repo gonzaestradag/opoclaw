@@ -10,7 +10,7 @@ import { readEnvFile } from './env.js';
 import { logger } from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, '..', 'store', 'claudeclaw.db');
+const DB_PATH = path.join(__dirname, '..', 'store', 'opoclaw.db');
 
 export interface UsageInfo {
   inputTokens: number;
@@ -146,7 +146,7 @@ export async function runAgent(
     for await (const event of query({
       prompt: singleTurn(message),
       options: {
-        // cwd = claudeclaw project root so Claude Code loads our CLAUDE.md
+        // cwd = opoclaw project root so Claude Code loads our CLAUDE.md
         cwd: PROJECT_ROOT,
 
         // Resume the previous session for this chat (persistent context)

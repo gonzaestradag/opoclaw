@@ -378,7 +378,7 @@ async function handleMessage(ctx: Context, message: string, forceVoiceReply = fa
       const uname = extUser?.username ?? '';
       const fname = (extUser?.first_name ?? '').replace(/'/g, "''");
       const lname = (extUser?.last_name ?? '').replace(/'/g, "''");
-      const dbPath = '/Users/opoclaw1/claudeclaw/store/claudeclaw.db';
+      const dbPath = '/Users/opoclaw1/claudeclaw/store/opoclaw.db';
       execSync(`sqlite3 '${dbPath}' "INSERT OR REPLACE INTO telegram_external_users (chat_id, username, first_name, last_name, last_seen) VALUES (${chatId}, '${uname}', '${fname}', '${lname}', unixepoch());"`);
       if (ALLOWED_CHAT_ID) {
         const displayName = uname ? `@${uname}` : `${fname} ${lname}`.trim() || `chat_id ${chatId}`;
@@ -391,7 +391,7 @@ async function handleMessage(ctx: Context, message: string, forceVoiceReply = fa
   // First-run setup guidance: ALLOWED_CHAT_ID not set yet
   if (!ALLOWED_CHAT_ID) {
     await ctx.reply(
-      `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart ClaudeClaw.`,
+      `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart OpoClaw.`,
     );
     return;
   }
@@ -754,7 +754,7 @@ export function createBot(): Bot {
   // /start — simple greeting (auth-gated after setup)
   bot.command('start', (ctx) => {
     if (ALLOWED_CHAT_ID && !isAuthorised(ctx.chat!.id)) return;
-    return ctx.reply('ClaudeClaw online. What do you need?');
+    return ctx.reply('OpoClaw online. What do you need?');
   });
 
   // /newchat — clear Claude session, start fresh
@@ -1237,7 +1237,7 @@ export function createBot(): Bot {
       let hasPending = false;
       try {
         const Database = (await import('better-sqlite3')).default;
-        const dbPath = '/Users/opoclaw1/claudeclaw/store/claudeclaw.db';
+        const dbPath = '/Users/opoclaw1/claudeclaw/store/opoclaw.db';
         const localDb = new Database(dbPath, { readonly: false });
         const pending = localDb.prepare(`SELECT id, recording_id, document_path FROM pending_email_followups WHERE answered = 0 ORDER BY asked_at DESC LIMIT 1`).get() as { id: number; recording_id: string; document_path: string } | undefined;
         localDb.close();
@@ -1253,7 +1253,7 @@ export function createBot(): Bot {
             // Mark as answered, skip email
             try {
               const Database2 = (await import('better-sqlite3')).default;
-              const localDb2 = new Database2('/Users/opoclaw1/claudeclaw/store/claudeclaw.db', { readonly: false });
+              const localDb2 = new Database2('/Users/opoclaw1/claudeclaw/store/opoclaw.db', { readonly: false });
               localDb2.prepare(`UPDATE pending_email_followups SET answered = 1 WHERE id = ?`).run(pending.id);
               localDb2.close();
             } catch (_) {}
@@ -1298,7 +1298,7 @@ export function createBot(): Bot {
     if (!isAuthorised(chatId)) return;
     if (!ALLOWED_CHAT_ID) {
       await ctx.reply(
-        `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart ClaudeClaw.`,
+        `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart OpoClaw.`,
       );
       return;
     }
@@ -1325,7 +1325,7 @@ export function createBot(): Bot {
     if (!isAuthorised(chatId)) return;
     if (!ALLOWED_CHAT_ID) {
       await ctx.reply(
-        `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart ClaudeClaw.`,
+        `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart OpoClaw.`,
       );
       return;
     }
@@ -1351,7 +1351,7 @@ export function createBot(): Bot {
     if (!isAuthorised(chatId)) return;
     if (!ALLOWED_CHAT_ID) {
       await ctx.reply(
-        `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart ClaudeClaw.`,
+        `Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart OpoClaw.`,
       );
       return;
     }
@@ -1377,7 +1377,7 @@ export function createBot(): Bot {
     const chatId = ctx.chat!.id;
     if (!isAuthorised(chatId)) return;
     if (!ALLOWED_CHAT_ID) {
-      await ctx.reply(`Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart ClaudeClaw.`);
+      await ctx.reply(`Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart OpoClaw.`);
       return;
     }
 
@@ -1402,7 +1402,7 @@ export function createBot(): Bot {
     const chatId = ctx.chat!.id;
     if (!isAuthorised(chatId)) return;
     if (!ALLOWED_CHAT_ID) {
-      await ctx.reply(`Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart ClaudeClaw.`);
+      await ctx.reply(`Your chat ID is ${chatId}.\n\nAdd this to your .env:\n\nALLOWED_CHAT_ID=${chatId}\n\nThen restart OpoClaw.`);
       return;
     }
 

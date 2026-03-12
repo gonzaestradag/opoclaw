@@ -15,19 +15,19 @@ if [ -z "$SLUG" ] || [ -z "$NAME" ]; then
 fi
 
 # Check for duplicate by slug
-EXISTING=$(sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT id FROM skill_proposals WHERE skill_slug='$SLUG';")
+EXISTING=$(sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "SELECT id FROM skill_proposals WHERE skill_slug='$SLUG';")
 if [ -n "$EXISTING" ]; then
   echo "SKIP: Skill '$SLUG' already proposed (id=$EXISTING). No duplicate created."
   exit 0
 fi
 
 # Insert proposal into skill_proposals table
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "INSERT INTO skill_proposals (skill_name, skill_slug, description, proposed_by, status, created_at, updated_at) VALUES ('$NAME', '$SLUG', '$DESC', '$BY', 'proposed', $NOW, $NOW);"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "INSERT INTO skill_proposals (skill_name, skill_slug, description, proposed_by, status, created_at, updated_at) VALUES ('$NAME', '$SLUG', '$DESC', '$BY', 'proposed', $NOW, $NOW);"
 
 # Also save to memories for semantic recall
 python3 -c "
 import sqlite3, time
-db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/claudeclaw.db')
+db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/opoclaw.db')
 content = 'Skill proposal: $NAME ($SLUG) -- $DESC. Proposed by $BY.'
 db.execute('INSERT INTO memories (chat_id, content, sector, salience, created_at, accessed_at) VALUES (?, ?, ?, ?, ?, ?)', ('system', content, 'skill_proposal', 3.0, $NOW, $NOW))
 db.commit()
@@ -35,7 +35,7 @@ print('Skill proposal saved to memory.')
 "
 
 # Log to activity feed
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, created_at) VALUES ('$BY', '$BY', '🔧', 'Skill propuesto: $NAME ($SLUG)', 'info', 'engineering', datetime('now'))"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, created_at) VALUES ('$BY', '$BY', '🔧', 'Skill propuesto: $NAME ($SLUG)', 'info', 'engineering', datetime('now'))"
 
 # Notify via Telegram
 bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "Skill propuesto: $NAME ($SLUG). En cola para revision de Marcus."

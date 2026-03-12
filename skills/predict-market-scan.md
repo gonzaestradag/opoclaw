@@ -15,7 +15,7 @@ Scan Polymarket and Kalshi for prediction markets worth trading. Filters 300+ ac
 2. Applies filters: volume > 200 contracts, time to expiry < 30 days, minimum liquidity present
 3. Flags anomalies: price moves > 10% in last 24h, bid-ask spread > 5 cents, volume spikes > 2x average
 4. Ranks markets by opportunity score (liquidity + anomaly weight)
-5. Saves results to `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/scan_results.json`
+5. Saves results to `${REPO_DIR}/workspace/prediction-market-bot/scan_results.json`
 6. Outputs a summary and passes data to the research step
 
 ## API connections
@@ -57,7 +57,7 @@ HIGH_PRICE   — price > 0.85 (contrarian opportunity check)
 
 ## Output format
 
-Save to `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/scan_results.json`:
+Save to `${REPO_DIR}/workspace/prediction-market-bot/scan_results.json`:
 
 ```json
 {
@@ -116,7 +116,7 @@ print(f'Fetched {len(markets)} Polymarket markets')
 ```
 3. Fetch Kalshi markets (if KALSHI_API_KEY available):
 ```bash
-KALSHI_KEY=$(grep KALSHI_API_KEY /Users/opoclaw1/claudeclaw/.env 2>/dev/null | cut -d= -f2)
+KALSHI_KEY=$(grep KALSHI_API_KEY ${REPO_DIR}/.env 2>/dev/null | cut -d= -f2)
 if [ -n "$KALSHI_KEY" ]; then
   curl -s -H "Authorization: Bearer $KALSHI_KEY" "https://trading-api.kalshi.com/trade-api/v2/markets?limit=200&status=open"
 fi

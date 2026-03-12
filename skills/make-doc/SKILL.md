@@ -99,4 +99,4 @@ EOF
 - Default: Word (.docx) unless user says "PDF" explicitly
 - Language: Spanish unless user writes in English
 - Professional tone by default, adjust per context
-- Include date, author name (Gonzalo Estrada) unless told otherwise
+- Include date and author name unless told otherwise

@@ -1,4 +1,4 @@
-const puppeteer = require('/Users/opoclaw1/claudeclaw/node_modules/puppeteer');
+const puppeteer = require('/Users/opoclaw1/opoclaw/node_modules/puppeteer');
 
 const USERNAME = 'Thornopoclaw';
 const PASSWORD = 'GOnza2002';
@@ -82,7 +82,7 @@ async function sleep(ms) {
       '--disable-blink-features=AutomationControlled',
       '--window-size=1280,800'
     ],
-    executablePath: require('/Users/opoclaw1/claudeclaw/node_modules/puppeteer').executablePath(),
+    executablePath: require('/Users/opoclaw1/opoclaw/node_modules/puppeteer').executablePath(),
     defaultViewport: null
   });
 

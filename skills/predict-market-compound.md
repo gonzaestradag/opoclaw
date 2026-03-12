@@ -25,9 +25,9 @@ Post-trade learning and system improvement. Runs post-mortems on resolved trades
 ## Input
 
 Reads from:
-- `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/paper_trades.json` — trade history
-- `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/predictions_log.json` — predictions
-- `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/failure_log.md` — existing lessons
+- `${REPO_DIR}/workspace/prediction-market-bot/paper_trades.json` — trade history
+- `${REPO_DIR}/workspace/prediction-market-bot/predictions_log.json` — predictions
+- `${REPO_DIR}/workspace/prediction-market-bot/failure_log.md` — existing lessons
 
 ## Step 1: Identify resolved trades
 
@@ -77,7 +77,7 @@ Classify every loss (and near-misses) into exactly one category:
 
 ## Step 3: Update failure_log.md
 
-Append lessons to `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/failure_log.md`:
+Append lessons to `${REPO_DIR}/workspace/prediction-market-bot/failure_log.md`:
 
 ```markdown
 ## [DATE] — [MARKET QUESTION SHORT]
@@ -107,7 +107,7 @@ After updating all resolved trades, calculate calibration metrics:
 import json
 import math
 
-with open('/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/predictions_log.json') as f:
+with open('${REPO_DIR}/workspace/prediction-market-bot/predictions_log.json') as f:
     predictions = json.load(f)
 
 resolved = [p for p in predictions if p.get('outcome') is not None]
@@ -185,7 +185,7 @@ Before each new scan cycle, the predict skills MUST:
 
 ```bash
 # Read failure log — load lessons into context before generating new signals
-cat /Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/failure_log.md
+cat ${REPO_DIR}/workspace/prediction-market-bot/failure_log.md
 ```
 
 Instruct the scanner and predictor: "Read failure_log.md before processing any market. Apply the lessons listed there — avoid market types or situations flagged as recurring failure patterns."

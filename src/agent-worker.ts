@@ -22,7 +22,7 @@ delete process.env['CLAUDECODE'];
 delete process.env['CLAUDE_CODE_ENTRYPOINT'];
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, '..', 'store', 'claudeclaw.db');
+const DB_PATH = path.join(__dirname, '..', 'store', 'opoclaw.db');
 const POLL_INTERVAL_MS = 2_000;    // check every 2s for fast task pickup
 const MAX_CONCURRENT = 4;          // run up to 4 agents at once
 const TASK_TIMEOUT_MS = 20 * 60 * 1000; // 20 min per task before forced failure
@@ -335,7 +335,7 @@ LOGGING EN TIEMPO REAL (OBLIGATORIO):
 Después de cada paso importante, registra tu progreso en el dashboard con estos comandos:
 
 # Actividad (aparece en Activity Feed):
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, created_at) VALUES ('${task.assignee_id}', '${meta.name}', '${meta.emoji}', '[LO QUE ACABAS DE HACER]', 'info', '${meta.department}', datetime('now'))"
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, created_at) VALUES ('${task.assignee_id}', '${meta.name}', '${meta.emoji}', '[LO QUE ACABAS DE HACER]', 'info', '${meta.department}', datetime('now'))"
 
 # Team Chat (aparece en la pantalla principal):
 curl -s -X POST http://localhost:3001/api/agent-messages -H "Content-Type: application/json" -d '{"thread_id":"${task.id}","from_agent_id":"${task.assignee_id}","from_agent_name":"${meta.name}","from_agent_emoji":"${meta.emoji}","message":"[LO QUE ACABAS DE HACER]","message_type":"message"}'

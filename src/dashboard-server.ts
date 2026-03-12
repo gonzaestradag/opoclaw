@@ -44,7 +44,7 @@ try {
     if (LOAD_FROM_ENV.includes(key)) process.env[key] = val;
   }
 } catch { /* .env not found, skip */ }
-const DB_PATH = path.join(__dirname, '..', 'store', 'claudeclaw.db');
+const DB_PATH = path.join(__dirname, '..', 'store', 'opoclaw.db');
 const UPLOADS_DIR = path.join(__dirname, '..', 'store', 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 // Honour the same env var that config.ts and bot.ts use so the URL in the
@@ -2748,14 +2748,14 @@ export function createDashboardApp(db: Database.Database): express.Application {
         '2) Busca en la web las 3 noticias mas importantes de IA del dia.',
         '3) Busca precios actuales de S&P 500, NASDAQ y Bitcoin.',
         '4) Lee eventos del dia desde la DB:',
-        '   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT title, start_time, end_time FROM calendar_events WHERE date(start_time) = date(\'now\', \'localtime\') ORDER BY start_time;"',
+        '   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "SELECT title, start_time, end_time FROM calendar_events WHERE date(start_time) = date(\'now\', \'localtime\') ORDER BY start_time;"',
         '5) Revisa actividad de agentes (GET http://localhost:3001/api/activity?limit=20).',
         `6) Escribe un guion en espanol, conversacional, maximo 90 segundos, empieza con "Buenos dias Gonzalo".${contextBlock}`,
         '7) Guarda el guion en /tmp/podcast_script.txt',
         '8) Genera audio con ElevenLabs — NUNCA uses OpenAI TTS ni ninguna otra voz:\n   bash /Users/opoclaw1/claudeclaw/scripts/generate-podcast-audio.sh /tmp/podcast_script.txt /tmp/morning_podcast.mp3\n   Este script usa la voz clonada de Gonzalo con los mismos parametros que Thorn usa en sus respuestas de voz.',
         '9) Guarda el brief via POST http://localhost:3001/api/briefs con date, title, script, audio_path, sections.',
         '10) Marca temas de contexto manual como usados:',
-        '    sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "UPDATE brief_context SET status=\'used\', used_at=datetime(\'now\') WHERE status=\'pending\'"',
+        '    sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db "UPDATE brief_context SET status=\'used\', used_at=datetime(\'now\') WHERE status=\'pending\'"',
         '11) Envia el audio por Telegram con caption.',
         '12) Notifica: bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "Listo. Brief generado on-demand y enviado."',
       ].join('\n');
@@ -7511,7 +7511,7 @@ Today is ${new Date().toISOString().split('T')[0]}. Use 24h time. If no date spe
   });
 
   // ── GET /api/scheduled-tasks ──────────────────────────────────────
-  // Reads from the claudeclaw main DB (scheduled_tasks table)
+  // Reads from the opoclaw main DB (scheduled_tasks table)
   app.get('/api/scheduled-tasks', (_req: Request, res: Response) => {
     try {
       const rows = (() => {
@@ -7581,7 +7581,7 @@ Today is ${new Date().toISOString().split('T')[0]}. Use 24h time. If no date spe
   });
 
   // ── GET /api/sessions ─────────────────────────────────────────────
-  // Returns session + token_usage stats from the main claudeclaw DB
+  // Returns session + token_usage stats from the main opoclaw DB
   app.get('/api/sessions', (_req: Request, res: Response) => {
     try {
       const cached = cacheGet('sessions');
@@ -7636,7 +7636,7 @@ Today is ${new Date().toISOString().split('T')[0]}. Use 24h time. If no date spe
   });
 
   // ── POST /api/scheduled-tasks ─────────────────────────────────────
-  // Creates a new scheduled task in the main claudeclaw DB
+  // Creates a new scheduled task in the main opoclaw DB
   app.post('/api/scheduled-tasks', (req: Request, res: Response) => {
     try {
       const { prompt, schedule } = req.body as { prompt?: string; schedule?: string };
@@ -7675,7 +7675,7 @@ Today is ${new Date().toISOString().split('T')[0]}. Use 24h time. If no date spe
   });
 
   // ── GET /api/memories ─────────────────────────────────────────────
-  // Returns semantic/episodic memories from the main claudeclaw DB
+  // Returns semantic/episodic memories from the main opoclaw DB
   app.get('/api/memories', (req: Request, res: Response) => {
     try {
       const sector = req.query['sector'] as string | undefined;

@@ -222,7 +222,7 @@ log "Report text: $REPORT_TEXT"
 log "Report saved: $REPORT_FILE"
 
 # ── Log to dashboard ──────────────────────────────────────────────────
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('jordan-walsh','Jordan','💰','Reporte nocturno generado — Total: \$${GRAND_TOTAL} USD','success','finance',datetime('now'))" 2>/dev/null || true
 
 # ── Send via TTS (fallback to tg-notify) ─────────────────────────────

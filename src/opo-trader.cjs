@@ -14,7 +14,7 @@
 
 'use strict';
 
-require('dotenv').config({ path: '/Users/opoclaw1/claudeclaw/.env' });
+require('dotenv').config({ path: '/Users/opoclaw1/opoclaw/.env' });
 
 const https   = require('https');
 const crypto  = require('crypto');
@@ -53,9 +53,9 @@ const CONFIG = {
   TICK_INTERVAL:      30_000,
   CANDLE_LIMIT:       60,
   CANDLE_TF:          '5m',
-  DB_PATH:            '/Users/opoclaw1/claudeclaw/store/claudeclaw.db',
-  STATUS_FILE:        '/Users/opoclaw1/claudeclaw/opo-work/opo-trader-status.json',
-  LOG_FILE:           '/Users/opoclaw1/claudeclaw/logs/opo-trader.log',
+  DB_PATH:            '/Users/opoclaw1/opoclaw/store/opoclaw.db',
+  STATUS_FILE:        '/Users/opoclaw1/opoclaw/opo-work/opo-trader-status.json',
+  LOG_FILE:           '/Users/opoclaw1/opoclaw/logs/opo-trader.log',
   MIN_REDEEM_USDT:    10.0,
 };
 
@@ -298,7 +298,7 @@ function logActivity(action, type = 'info') {
 function sendTelegram(msg) {
   try {
     const escaped = msg.replace(/"/g, '\\"').replace(/`/g, "'").replace(/\$/g, '\\$');
-    execSync(`bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "${escaped}"`, {
+    execSync(`bash /Users/opoclaw1/opoclaw/scripts/tg-notify.sh "${escaped}"`, {
       stdio: 'ignore', timeout: 10000,
     });
   } catch (e) {

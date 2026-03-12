@@ -22,7 +22,7 @@ Auto-generate documentation from code. Designed for Lucas (frontend) and Elias (
 
 ```bash
 # Last 2 weeks of commits formatted as changelog
-git -C /Users/opoclaw1/claudeclaw log \
+git -C ${REPO_DIR} log \
   --since="2 weeks ago" \
   --pretty=format:"%ad — %s" \
   --date=short \
@@ -54,18 +54,18 @@ curl -X POST http://localhost:3001/api/agents/thorn/chat \
 
 ```bash
 # Find functions without comments
-grep -rn "^function\|^const.*=.*=>" /Users/opoclaw1/claudeclaw/src/ \
+grep -rn "^function\|^const.*=.*=>" ${REPO_DIR}/src/ \
   --include="*.ts" | grep -v "//" | head -20
 
 # Find endpoints without documentation
-grep -n "app\.\(get\|post\|patch\|delete\)" /Users/opoclaw1/claudeclaw/src/dashboard-server.ts | head -20
+grep -n "app\.\(get\|post\|patch\|delete\)" ${REPO_DIR}/src/dashboard-server.ts | head -20
 ```
 
 ### Update CLAUDE.md
 
 When a new feature is added to OpoClaw, append to CLAUDE.md:
 ```bash
-cat >> /Users/opoclaw1/claudeclaw/CLAUDE.md << 'EOF'
+cat >> ${REPO_DIR}/CLAUDE.md << 'EOF'
 
 ## [Feature Name] — Added [DATE]
 [One paragraph: what it does, how to use it, any agent-specific notes]
@@ -75,6 +75,6 @@ EOF
 ## Log activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('lucas-park','Lucas','🎨','Generated/updated documentation','success','engineering',datetime('now'))"
 ```

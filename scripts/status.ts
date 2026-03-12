@@ -61,7 +61,7 @@ function parseEnvFile(filePath: string): Record<string, string> {
 
 async function main() {
   console.log();
-  console.log(`  ${c.bold}${c.cyan}ClaudeClaw Status${c.reset}`);
+  console.log(`  ${c.bold}${c.cyan}OpoClaw Status${c.reset}`);
   console.log(`  ${c.gray}${'─'.repeat(17)}${c.reset}`);
 
   // Node version
@@ -140,7 +140,7 @@ async function main() {
   // Service status
   if (process.platform === 'darwin') {
     try {
-      const output = execSync('launchctl list com.claudeclaw.app', {
+      const output = execSync('launchctl list com.opoclaw.app', {
         stdio: 'pipe',
       })
         .toString()
@@ -153,7 +153,7 @@ async function main() {
         let pid = '';
         for (const line of lines) {
           const parts = line.split('\t');
-          if (parts.length >= 3 && parts[2] === 'com.claudeclaw.app') {
+          if (parts.length >= 3 && parts[2] === 'com.opoclaw.app') {
             pid = parts[0].trim();
             break;
           }
@@ -169,7 +169,7 @@ async function main() {
     }
   } else if (process.platform === 'linux') {
     try {
-      const output = execSync('systemctl --user is-active claudeclaw', {
+      const output = execSync('systemctl --user is-active opoclaw', {
         stdio: 'pipe',
       }).toString().trim();
       if (output === 'active') {
@@ -182,7 +182,7 @@ async function main() {
     }
   } else {
     try {
-      execSync('pm2 describe claudeclaw', { stdio: 'pipe' });
+      execSync('pm2 describe opoclaw', { stdio: 'pipe' });
       ok('Service: running (PM2)');
     } catch {
       warn('Service: not detected (check PM2 or start manually)');
@@ -190,7 +190,7 @@ async function main() {
   }
 
   // Memory DB
-  const dbPath = path.join(PROJECT_ROOT, 'store', 'claudeclaw.db');
+  const dbPath = path.join(PROJECT_ROOT, 'store', 'opoclaw.db');
   if (fs.existsSync(dbPath)) {
     try {
       const db = new Database(dbPath, { readonly: true });

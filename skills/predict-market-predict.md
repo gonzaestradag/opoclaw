@@ -22,7 +22,7 @@ Calculate model probability, edge vs market price, and generate trade signals. U
 
 ## Input
 
-Reads from: `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/research_results.json`
+Reads from: `${REPO_DIR}/workspace/prediction-market-bot/research_results.json`
 
 Only processes markets with `research_signal` of "BUY_YES" or "BUY_NO".
 
@@ -92,7 +92,7 @@ The ideal system runs 3 independent estimates and aggregates them:
 
 When GOOGLE_API_KEY is available, optionally cross-validate with Gemini:
 ```bash
-GEMINI_KEY=$(grep GOOGLE_API_KEY /Users/opoclaw1/claudeclaw/.env 2>/dev/null | cut -d= -f2)
+GEMINI_KEY=$(grep GOOGLE_API_KEY ${REPO_DIR}/.env 2>/dev/null | cut -d= -f2)
 # If present, make a Gemini API call with the same market question for a second opinion
 ```
 
@@ -136,7 +136,7 @@ For each market, output:
 ```
 
 Save all signals (including HOLD decisions) to:
-`/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/predictions_log.json`
+`${REPO_DIR}/workspace/prediction-market-bot/predictions_log.json`
 
 Append — do not overwrite. This file is the calibration history.
 

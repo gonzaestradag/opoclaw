@@ -3,7 +3,7 @@
 # Runs every 30 min via cron. Replaces (upserts) the day's entry in SQLite.
 # Never sends Telegram messages.
 
-DB_PATH="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB_PATH="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 TODAY=$(date '+%Y-%m-%d')
 TODAY_LONG=$(date '+%A, %B %-d %Y')
 NOW=$(date '+%H:%M')

@@ -1,7 +1,7 @@
 /**
  * OPOCLAW — ESTRUCTURA DE EMPRESA
  * Sistema de agentes autónomos gestionado por Thorn (CEO)
- * Todo vive en claudeclaw. Nada tiene que ver con openclaw-gateway.
+ * Todo vive en opoclaw. Nada tiene que ver con openclaw-gateway.
  */
 
 const COMPANY = {

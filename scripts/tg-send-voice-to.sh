@@ -34,13 +34,13 @@ fi
 # 2. If CHAT_ID is a @username, resolve to numeric ID
 if [[ "$CHAT_ID" == @* ]]; then
   UNAME_BARE="${CHAT_ID#@}"  # strip the @ for external_users lookup
-  DB_CHAT_ID=$(sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+  DB_CHAT_ID=$(sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
     "SELECT telegram_chat_id FROM telegram_contacts WHERE telegram_username='${CHAT_ID}' AND telegram_chat_id IS NOT NULL AND telegram_chat_id != '' LIMIT 1;" 2>/dev/null)
   if [ -n "$DB_CHAT_ID" ]; then
     CHAT_ID="$DB_CHAT_ID"
   else
     # Fallback 1: check telegram_external_users (auto-saved when they messaged the bot)
-    EXT_CHAT_ID=$(sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+    EXT_CHAT_ID=$(sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
       "SELECT chat_id FROM telegram_external_users WHERE username='${UNAME_BARE}' LIMIT 1;" 2>/dev/null)
     if [ -n "$EXT_CHAT_ID" ]; then
       CHAT_ID="$EXT_CHAT_ID"
@@ -49,7 +49,7 @@ if [[ "$CHAT_ID" == @* ]]; then
       RESOLVED=$(curl -s "https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${CHAT_ID}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['id']) if d.get('ok') else print('')" 2>/dev/null)
       if [ -n "$RESOLVED" ]; then
         CHAT_ID="$RESOLVED"
-        sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+        sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
           "UPDATE telegram_contacts SET telegram_chat_id='${RESOLVED}', updated_at=datetime('now') WHERE telegram_username='@${UNAME_BARE}';" 2>/dev/null || true
       else
         echo "WARNING: Could not resolve ${CHAT_ID} to a numeric ID." >&2
@@ -98,9 +98,9 @@ PYEOF
       > /dev/null
     rm -f "$TMP_AUDIO"
     # Log to contact_messages DB
-    CONTACT_NAME=$(sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+    CONTACT_NAME=$(sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
       "SELECT name FROM telegram_contacts WHERE telegram_chat_id='${CHAT_ID}' OR telegram_username='${1}' LIMIT 1;" 2>/dev/null || echo "${1}")
-    sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+    sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
       "INSERT INTO contact_messages (contact_name, contact_username, channel, message_text) VALUES ('${CONTACT_NAME:-${1}}', '${1}', 'telegram', $(python3 -c "import sys; print(repr('${TEXT//\'/\\'\'}'[:500]))" 2>/dev/null || echo "'${TEXT:0:100}''));" 2>/dev/null || true
     echo "Voice sent to $CHAT_ID via ElevenLabs"
   else

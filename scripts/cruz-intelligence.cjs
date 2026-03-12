@@ -25,9 +25,9 @@ const fs    = require('fs');
 const path  = require('path');
 const { execSync } = require('child_process');
 
-const BASE        = '/Users/opoclaw1/claudeclaw';
+const BASE        = '/Users/opoclaw1/opoclaw';
 const SIGNAL_PATH = path.join(BASE, 'store/market_signal.json');
-const DB_PATH     = path.join(BASE, 'store/claudeclaw.db');
+const DB_PATH     = path.join(BASE, 'store/opoclaw.db');
 const LOG_PATH    = path.join(BASE, 'logs/cruz-intelligence.log');
 const ENV_PATH    = path.join(BASE, '.env');
 

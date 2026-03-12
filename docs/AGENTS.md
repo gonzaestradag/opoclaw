@@ -1,6 +1,6 @@
 # Building Your Agent Team
 
-ClaudeClaw ships with a multi-agent system built in. Instead of one assistant doing everything, you build a company: a CEO assistant that talks to you, directors that own departments, and workers that execute tasks in parallel. All running on your machine, all visible on the dashboard.
+OpoClaw ships with a multi-agent system built in. Instead of one assistant doing everything, you build a company: a CEO assistant that talks to you, directors that own departments, and workers that execute tasks in parallel. All running on your machine, all visible on the dashboard.
 
 This guide walks you through how it works and how to make it yours.
 
@@ -136,7 +136,7 @@ curl -s -X POST http://localhost:3001/api/agents \
 Or directly in SQLite:
 
 ```bash
-sqlite3 store/claudeclaw.db \
+sqlite3 store/opoclaw.db \
   "INSERT INTO agents (id, name, full_name, title, department, role, emoji, model, reports_to, status, updated_at)
    VALUES ('agent-id', 'First', 'Full Name', 'Role', 'engineering', 'employee', '⚙️', 'claude-haiku-4-5', 'director-id', 'active', unixepoch())"
 ```

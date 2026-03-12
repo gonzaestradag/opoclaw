@@ -4,7 +4,7 @@
 # techniques, updates its knowledge file, and creates new skills if gaps found.
 # SILENT — zero Telegram, zero output to console.
 
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 AGENTS_DIR="/Users/opoclaw1/claudeclaw/workspace/agents"
 SKILLS_DIR="/Users/opoclaw1/.claude/skills"
 LOG="/tmp/iq-boost-$(date +%Y%m%d).log"
@@ -247,7 +247,7 @@ TRADING_PROMPT="You are Victoria Cross, Ventures Director at OpoClaw. Tonight's 
    - Any new signals or indicators worth adding
    - Risk assessment for current positions
 4. Log your work:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('victoria-cross','Victoria','👑','Nightly trading strategy research complete','success','ventures',datetime('now'))\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('victoria-cross','Victoria','👑','Nightly trading strategy research complete','success','ventures',datetime('now'))\"
 
 Write the memo now. Be specific and actionable."
 
@@ -273,7 +273,7 @@ Steps:
 2. Implement ONE fix (keep it small, safe, and self-contained)
 3. Run: bash /Users/opoclaw1/claudeclaw/scripts/deploy-dashboard.sh
 4. Log what you did:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('lucas-park','Lucas','⚡','Nightly UI fix: [describe what you fixed]','success','engineering',datetime('now'))\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('lucas-park','Lucas','⚡','Nightly UI fix: [describe what you fixed]','success','engineering',datetime('now'))\"
 
 Focus on: IQ scores not displayed, broken links, missing data, visual bugs. Do NOT refactor — just fix one thing cleanly."
 
@@ -298,9 +298,9 @@ Tasks:
 1. Review the skill proposals above — for each one that would genuinely help the system, create the skill file at ~/.claude/skills/{slug}/prompt.md
 2. Check if any existing skills seem redundant or overlapping — note them (don't delete, just note)
 3. Update the skill_proposals table for created skills:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"UPDATE skill_proposals SET status='created', updated_at=$(date +%s) WHERE skill_slug='SLUG';\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"UPDATE skill_proposals SET status='created', updated_at=$(date +%s) WHERE skill_slug='SLUG';\"
 4. Log:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('marcus-reyes','Marcus','🔧','Nightly skill audit complete','success','engineering',datetime('now'))\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('marcus-reyes','Marcus','🔧','Nightly skill audit complete','success','engineering',datetime('now'))\"
 
 Be decisive. If a skill proposal is good, build it tonight."
 

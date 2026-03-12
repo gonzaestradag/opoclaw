@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Generate isgo-business-plan.pdf from isgo-business-plan.md using Puppeteer
-const puppeteer = require('/Users/opoclaw1/claudeclaw/node_modules/puppeteer');
+const puppeteer = require('/Users/opoclaw1/opoclaw/node_modules/puppeteer');
 const fs = require('fs');
 const path = require('path');
 
-const WORKSPACE = '/Users/opoclaw1/claudeclaw/workspace';
+const WORKSPACE = '/Users/opoclaw1/opoclaw/workspace';
 const mdPath = path.join(WORKSPACE, 'isgo-business-plan.md');
 const pdfPath = path.join(WORKSPACE, 'isgo-business-plan.pdf');
 

@@ -5,7 +5,7 @@ Produce a commercial-quality AI video for OpoClaw. Takes a brief/document and ou
 ## Workflow
 
 1. **Script** — Pixel Jones writes the script and scene breakdown (30–120 seconds, timed segments)
-2. **Voiceover** — Generate narration using ElevenLabs with Gonzalo's voice clone
+2. **Voiceover** — Generate narration using ElevenLabs with your voice clone
 3. **Visuals** — Generate scenes using available AI video APIs (Sora, Pika, RunwayML) or DALL-E for stills
 4. **Assembly** — Combine clips + voiceover + music into final video using ffmpeg
 5. **Deliver** — Send the final video to Telegram and save to Brain
@@ -18,8 +18,8 @@ Use this skill for: "haz un video", "produce a commercial", "video de OpoClaw", 
 
 ```bash
 # Generate voiceover with ElevenLabs
-ELEVEN_KEY=$(grep ELEVENLABS_API_KEY /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
-VOICE_ID=$(grep ELEVENLABS_VOICE_ID /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+ELEVEN_KEY=$(grep ELEVENLABS_API_KEY ${REPO_DIR}/.env | cut -d= -f2)
+VOICE_ID=$(grep ELEVENLABS_VOICE_ID ${REPO_DIR}/.env | cut -d= -f2)
 
 curl -s -X POST "https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID" \
   -H "xi-api-key: $ELEVEN_KEY" \
@@ -36,16 +36,16 @@ curl -s -X POST "https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID" \
 
 ```bash
 # Check available video generation APIs
-grep -i "SORA\|PIKA\|RUNWAY\|KLING\|LUMA\|FAL_\|REPLICATE" /Users/opoclaw1/claudeclaw/.env
+grep -i "SORA\|PIKA\|RUNWAY\|KLING\|LUMA\|FAL_\|REPLICATE" ${REPO_DIR}/.env
 
 # Option 1: FAL.ai (supports many models including fast-svd, kling, etc.)
-FAL_KEY=$(grep FAL_API_KEY /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+FAL_KEY=$(grep FAL_API_KEY ${REPO_DIR}/.env | cut -d= -f2)
 
 # Option 2: Replicate
-REPLICATE_KEY=$(grep REPLICATE_API_TOKEN /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+REPLICATE_KEY=$(grep REPLICATE_API_TOKEN ${REPO_DIR}/.env | cut -d= -f2)
 
 # Option 3: If no video API, use DALL-E for stills + ffmpeg to make a slideshow video
-OPENAI_KEY=$(grep OPENAI_API_KEY /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+OPENAI_KEY=$(grep OPENAI_API_KEY ${REPO_DIR}/.env | cut -d= -f2)
 ```
 
 ## Assembly with ffmpeg
@@ -71,11 +71,11 @@ ffmpeg -i /tmp/final.mp4 -i /tmp/bgmusic.mp3 -filter_complex "[1:a]volume=0.15[m
 
 ```bash
 # Send to Telegram
-BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
-CHAT_ID=$(grep TELEGRAM_CHAT_ID /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+BOT_TOKEN=$(grep TELEGRAM_BOT_TOKEN ${REPO_DIR}/.env | cut -d= -f2)
+CHAT_ID=$(grep TELEGRAM_CHAT_ID ${REPO_DIR}/.env | cut -d= -f2)
 curl -s -F "chat_id=$CHAT_ID" -F "video=@/tmp/final.mp4" -F "caption=VIDEO TITLE" \
   "https://api.telegram.org/bot$BOT_TOKEN/sendVideo"
 
 # Save to Brain
-bash /Users/opoclaw1/claudeclaw/scripts/brain-save.sh "/tmp/final.mp4" "Negocio"
+bash ${REPO_DIR}/scripts/brain-save.sh "/tmp/final.mp4" "Negocio"
 ```

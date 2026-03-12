@@ -100,6 +100,6 @@ Fill in the bracketed placeholders then send:
 ## Log activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('jordan-walsh','Jordan','💰','Generated contract document','success','finance',datetime('now'))"
 ```

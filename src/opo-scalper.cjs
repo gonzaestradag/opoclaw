@@ -21,14 +21,14 @@
 
 'use strict';
 
-require('dotenv').config({ path: '/Users/opoclaw1/claudeclaw/.env' });
+require('dotenv').config({ path: '/Users/opoclaw1/opoclaw/.env' });
 
 const https    = require('https');
 const crypto   = require('crypto');
 const fs       = require('fs');
 const path     = require('path');
 const { execSync } = require('child_process');
-const { WebSocket } = require('/Users/opoclaw1/claudeclaw/node_modules/ws');
+const { WebSocket } = require('/Users/opoclaw1/opoclaw/node_modules/ws');
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -94,9 +94,9 @@ const CONFIG = {
   BALANCE_SYNC_MS: 30_000,    // Every 30 seconds
 
   // Paths
-  DB_PATH:     '/Users/opoclaw1/claudeclaw/store/claudeclaw.db',
-  STATUS_FILE: '/Users/opoclaw1/claudeclaw/opo-work/opo-scalper-status.json',
-  LOG_FILE:    '/Users/opoclaw1/claudeclaw/logs/opo-scalper.log',
+  DB_PATH:     '/Users/opoclaw1/opoclaw/store/opoclaw.db',
+  STATUS_FILE: '/Users/opoclaw1/opoclaw/opo-work/opo-scalper-status.json',
+  LOG_FILE:    '/Users/opoclaw1/opoclaw/logs/opo-scalper.log',
 };
 
 const API_KEY    = process.env.BINANCE_API_KEY;
@@ -412,7 +412,7 @@ function logActivity(action, type = 'info') {
 function sendTelegram(msg) {
   try {
     const escaped = msg.replace(/"/g, '\\"').replace(/`/g, "'").replace(/\$/g, '\\$');
-    execSync(`bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "${escaped}"`, {
+    execSync(`bash /Users/opoclaw1/opoclaw/scripts/tg-notify.sh "${escaped}"`, {
       stdio: 'ignore', timeout: 10000,
     });
   } catch (e) {
@@ -565,7 +565,7 @@ async function executeBuy(pair, currentPrice, reason, positionSizeMultiplier = 1
       log('WARN', `[EL ESTRATEGA WS] DRAWDOWN KILL SWITCH: session PnL ${(sessionPnlPct*100).toFixed(2)}%. Pausing 30min.`);
       try {
         const msg = `[EL ESTRATEGA WS] Drawdown kill switch: session down ${(sessionPnlPct*100).toFixed(2)}%. Pausing new entries 30min.`.replace(/"/g, '\\"');
-        require('child_process').execSync(`bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "${msg}"`, { stdio: 'ignore', timeout: 10000 });
+        require('child_process').execSync(`bash /Users/opoclaw1/opoclaw/scripts/tg-notify.sh "${msg}"`, { stdio: 'ignore', timeout: 10000 });
       } catch {}
       return;
     }

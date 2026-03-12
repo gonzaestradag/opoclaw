@@ -2,7 +2,7 @@
 # system-monitor.sh — silent system health check
 # Only notifies when there is a problem (and whether it was resolved or not)
 
-DB_PATH="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB_PATH="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 TG_NOTIFY="/Users/opoclaw1/claudeclaw/scripts/tg-notify.sh"
 PROBLEM_FILE="/tmp/sysmon-last-problem.txt"
 PROBLEMS=()

@@ -4,7 +4,7 @@
 # SILENT: no Telegram pings to Gonzalo. All activity logged internally only.
 
 API_BASE="http://localhost:3001"
-DB_PATH="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB_PATH="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 TIMEOUT_MINUTES=15
 
 # ─── PART 1: Detect tasks stuck in_progress via API ──────────────────────────

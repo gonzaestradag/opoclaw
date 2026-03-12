@@ -10,7 +10,7 @@ Produce a structured competitive intelligence report on any company, product, or
 
 ## Triggers
 
-Use when Gonzalo or an agent asks to analyze a competitor, understand a market player, or benchmark against another company.
+Use when asked to analyze a competitor, understand a market player, or benchmark against another company.
 
 ## Output format
 
@@ -20,7 +20,7 @@ Always produce a report with these sections:
 3. **Positioning** — how they market themselves, what narrative they use
 4. **Strengths** — what they do well
 5. **Weaknesses / gaps** — what they miss, complaints, limitations
-6. **Opportunity for OpoClaw** — concrete angle Gonzalo can exploit
+6. **Opportunity** — concrete angle to exploit
 
 ## Workflow
 
@@ -42,12 +42,12 @@ Always produce a report with these sections:
 
 ## Output tone
 
-Plain language. No fluff. Lead with what Gonzalo can actually do with this info. Flag the top 1-2 actionable opportunities explicitly. Max 600 words unless deep research is requested.
+Plain language. No fluff. Lead with what can actually be done with this info. Flag the top 1-2 actionable opportunities explicitly. Max 600 words unless deep research is requested.
 
 ## Log to OpoClaw
 
 After completing, log activity:
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('rafael-silva','Rafael','🔍','Completed competitor intel report','success','intelligence',datetime('now'))"
 ```

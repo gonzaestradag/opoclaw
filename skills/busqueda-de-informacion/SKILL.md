@@ -122,7 +122,7 @@ TOPIC_SLUG="[topic-slug]"
 RESEARCH_FILE="/Users/opoclaw1/claudeclaw/workspace/research/$(date +%Y%m%d)-${TOPIC_SLUG}.md"
 
 # Save to brain_vault (fallback if API is down)
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO brain_vault (title, content, type, tags, file_path, starred, created_at) VALUES (
     'Research: [TOPIC]',
     '$(head -c 2000 "$RESEARCH_FILE" | sed "s/'/''/g")',
@@ -144,7 +144,7 @@ curl -s -X POST http://localhost:3001/api/brain/vault \
 
 ```bash
 # Always check if this topic was already researched
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "SELECT title, created_at FROM brain_vault WHERE title LIKE '%[TOPIC]%' AND type='research' ORDER BY created_at DESC LIMIT 3;" 2>/dev/null
 # Also check the research folder
 ls /Users/opoclaw1/claudeclaw/workspace/research/ 2>/dev/null | grep -i "[topic-keyword]" | tail -5
@@ -155,6 +155,6 @@ If a fresh brief exists (< 7 days old), return it directly instead of re-running
 ## Log to OpoClaw
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('rafael-silva','Rafael','🔍','Research completado: [topic]','success','intelligence',datetime('now'))"
 ```

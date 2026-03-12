@@ -52,7 +52,7 @@ echo "Generated at: $(date)" >> "$OUTPUT"
 echo "===" >> "$OUTPUT"
 
 # Log to activity feed
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('opo-binance-bot','El Vigilante','🤖','Intel feed updated: Fear&Greed=${FG_VALUE}(${FG_CLASS})','info','trading',datetime('now'))" 2>/dev/null
 
 echo "Intel feed written to $OUTPUT"

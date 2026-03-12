@@ -10,7 +10,7 @@ Generate clean, professional PDF invoices. Designed for Jordan (finance) in OpoC
 
 ## Triggers
 
-Use when Gonzalo needs to bill a client, generate a receipt, or create a payment request.
+Use when a client needs to be billed, a receipt generated, or a payment request created.
 
 ## Required inputs (ask if not given)
 
@@ -41,7 +41,7 @@ LINE_ITEMS = [
 CURRENCY = "USD"
 INVOICE_NUM = f"INV-{datetime.datetime.now().strftime('%Y%m%d-%H%M')}"
 DUE_DAYS = 15
-COMPANY = "OpoClaw / Gonzalo Estrada"
+COMPANY = "YOUR_COMPANY_NAME"
 
 # Calculate
 subtotal = sum(qty * price for _, qty, price in LINE_ITEMS)
@@ -112,6 +112,6 @@ Send via: `[SEND_FILE:/tmp/invoice-{INVOICE_NUM}.pdf|Invoice {INVOICE_NUM} for {
 ## Log to Jordan's activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('jordan-walsh','Jordan','💰','Generated invoice for client','success','finance',datetime('now'))"
 ```

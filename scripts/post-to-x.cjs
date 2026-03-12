@@ -1,4 +1,4 @@
-const puppeteer = require('/Users/opoclaw1/claudeclaw/node_modules/puppeteer');
+const puppeteer = require('/Users/opoclaw1/opoclaw/node_modules/puppeteer');
 
 const USERNAME = 'Thornopoclaw';
 const PASSWORD = 'GOnza2002';
@@ -97,7 +97,7 @@ async function typeText(page, selector, text) {
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    executablePath: require('/Users/opoclaw1/claudeclaw/node_modules/puppeteer').executablePath()
+    executablePath: require('/Users/opoclaw1/opoclaw/node_modules/puppeteer').executablePath()
   });
 
   const page = await browser.newPage();

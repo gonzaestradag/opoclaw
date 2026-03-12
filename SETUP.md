@@ -345,7 +345,7 @@ pm2 status            # Alias for pm2 list
 
 ```bash
 pm2 logs              # Stream all logs
-pm2 logs claudeclaw   # Logs for a specific process
+pm2 logs opoclaw   # Logs for a specific process
 pm2 logs --lines 100  # Last 100 lines
 ```
 
@@ -353,7 +353,7 @@ pm2 logs --lines 100  # Last 100 lines
 
 ```bash
 pm2 restart all           # Restart all processes
-pm2 restart claudeclaw    # Restart a specific process
+pm2 restart opoclaw    # Restart a specific process
 pm2 reload all            # Zero-downtime reload (for web servers)
 ```
 
@@ -362,7 +362,7 @@ pm2 reload all            # Zero-downtime reload (for web servers)
 ```bash
 pm2 stop all              # Stop all (keeps them in the list)
 pm2 delete all            # Remove all from PM2 list
-pm2 stop claudeclaw       # Stop a specific process
+pm2 stop opoclaw       # Stop a specific process
 ```
 
 ### Start on system boot
@@ -386,7 +386,7 @@ pm2 restart all --update-env   # Restart and reload env vars
 
 | Name | What it is |
 |------|------------|
-| `claudeclaw` | Main bot + scheduler |
+| `opoclaw` | Main bot + scheduler |
 | `dashboard-server` | React dashboard backend |
 | `satoshi-bot` | Conservative trading bot |
 | `nakamoto-bot` | Aggressive trading bot |
@@ -400,11 +400,11 @@ pm2 restart all --update-env   # Restart and reload env vars
 
 ### Bot not responding on Telegram
 
-1. Check PM2: `pm2 list` — is `claudeclaw` online?
-2. Check logs: `pm2 logs claudeclaw`
+1. Check PM2: `pm2 list` — is `opoclaw` online?
+2. Check logs: `pm2 logs opoclaw`
 3. Verify the bot token: `curl "https://api.telegram.org/botYOUR_TOKEN/getMe"`
 4. Make sure `ALLOWED_CHAT_ID` matches your actual Telegram user ID
-5. Restart: `pm2 restart claudeclaw`
+5. Restart: `pm2 restart opoclaw`
 
 ### Dashboard not loading
 
@@ -423,14 +423,14 @@ You have `ANTHROPIC_API_KEY` set in `.env` while also using `claude login`. The 
 ### Voice notes not transcribed (sending as text instead)
 
 - Check `GROQ_API_KEY` is set in `.env`
-- Restart: `pm2 restart claudeclaw --update-env`
-- Check logs for `[voice]` entries: `pm2 logs claudeclaw | grep voice`
+- Restart: `pm2 restart opoclaw --update-env`
+- Check logs for `[voice]` entries: `pm2 logs opoclaw | grep voice`
 
 ### Voice responses are text instead of audio
 
 - Check `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` are both set
 - Verify the Voice ID exists in your ElevenLabs account
-- Check logs: `pm2 logs claudeclaw | grep elevenlabs`
+- Check logs: `pm2 logs opoclaw | grep elevenlabs`
 
 ### Binance "invalid API key" or trading bots offline
 

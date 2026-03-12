@@ -62,6 +62,6 @@ n8n start &
 ## Log activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('silas-vane','Silas','⚡','Built n8n automation workflow','success','engineering',datetime('now'))"
 ```

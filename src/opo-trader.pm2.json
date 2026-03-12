@@ -1,15 +1,15 @@
 {
   "apps": [{
     "name": "opo-trader",
-    "script": "/Users/opoclaw1/claudeclaw/src/opo-trader.cjs",
-    "cwd": "/Users/opoclaw1/claudeclaw",
+    "script": "/Users/opoclaw1/opoclaw/src/opo-trader.cjs",
+    "cwd": "/Users/opoclaw1/opoclaw",
     "interpreter": "node",
     "restart_delay": 15000,
     "max_restarts": 50,
     "env": {
       "NODE_ENV": "production"
     },
-    "error_file": "/Users/opoclaw1/claudeclaw/logs/opo-trader-pm2-error.log",
-    "out_file": "/Users/opoclaw1/claudeclaw/logs/opo-trader-pm2-out.log"
+    "error_file": "/Users/opoclaw1/opoclaw/logs/opo-trader-pm2-error.log",
+    "out_file": "/Users/opoclaw1/opoclaw/logs/opo-trader-pm2-out.log"
   }]
 }

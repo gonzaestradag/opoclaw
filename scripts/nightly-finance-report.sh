@@ -8,7 +8,7 @@ set -uo pipefail
 
 # ── Load env ──────────────────────────────────────────────────────────
 ENV_FILE="/Users/opoclaw1/claudeclaw/.env"
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 DIST_DIR="/Users/opoclaw1/claudeclaw/dist"
 TG_NOTIFY="/Users/opoclaw1/claudeclaw/scripts/tg-notify.sh"
 
@@ -285,7 +285,7 @@ MEMORY_CONTENT="Reporte financiero $TODAY: Binance $BINANCE_STATUS (\$$TOTAL_BIN
 
 python3 -c "
 import sqlite3, time
-db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/claudeclaw.db')
+db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/opoclaw.db')
 now = int(time.time())
 content = '''$MEMORY_CONTENT'''
 chat_id = '$CHAT_ID_DB'

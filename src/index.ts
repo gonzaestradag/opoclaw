@@ -11,7 +11,7 @@ import { cleanupOldUploads } from './media.js';
 import { initDecaySweep } from './memory.js';
 import { initScheduler } from './scheduler.js';
 
-const PID_FILE = path.join(STORE_DIR, 'claudeclaw.pid');
+const PID_FILE = path.join(STORE_DIR, 'opoclaw.pid');
 
 // ── TTS CLI subcommand ───────────────────────────────────────────────────────
 // Usage: node dist/index.js tts "text to speak"
@@ -76,7 +76,7 @@ function showBanner(): void {
     const banner = fs.readFileSync(bannerPath, 'utf-8');
     console.log('\n' + banner);
   } catch {
-    console.log('\n  ClaudeClaw\n');
+    console.log('\n  OpoClaw\n');
   }
 }
 
@@ -238,13 +238,13 @@ async function main(): Promise<void> {
   process.on('SIGINT', () => void shutdown());
   process.on('SIGTERM', () => void shutdown());
 
-  logger.info('Starting ClaudeClaw...');
+  logger.info('Starting OpoClaw...');
 
   await bot.start({
     drop_pending_updates: true,
     onStart: (botInfo) => {
-      logger.info({ username: botInfo.username }, 'ClaudeClaw is running');
-      console.log(`\n  ClaudeClaw online: @${botInfo.username}`);
+      logger.info({ username: botInfo.username }, 'OpoClaw is running');
+      console.log(`\n  OpoClaw online: @${botInfo.username}`);
       console.log(`  Send /chatid to get your chat ID for ALLOWED_CHAT_ID\n`);
     },
   });

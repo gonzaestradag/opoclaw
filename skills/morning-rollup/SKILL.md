@@ -1,12 +1,12 @@
 ---
 name: morning-rollup
-description: Generate Gonzalo's morning brief — urgent emails, today's calendar, top priorities, and key news. Triggers on: "morning brief", "brief del día", "resumen de la mañana", "qué tengo hoy", "what's on today", "daily rollup", "morning update", "buenos días qué hay", "buenos días".
+description: Generate the user's morning brief — urgent emails, today's calendar, top priorities, and key news. Triggers on: "morning brief", "brief del día", "resumen de la mañana", "qué tengo hoy", "what's on today", "daily rollup", "morning update", "buenos días qué hay", "buenos días".
 allowed-tools: Bash, WebSearch
 ---
 
 # morning-rollup
 
-Generate Gonzalo's daily morning brief. Designed for Maya (operations) to run automatically at 7am or on demand.
+Generate the user's daily morning brief. Designed for Maya (operations) to run automatically at 7am or on demand.
 
 ## Structure
 
@@ -26,7 +26,7 @@ PRIORITY INBOX
 AGENT STATUS
 [any tasks that completed overnight, any failures]
 
-NEWS (relevant to Gonzalo's work)
+NEWS (relevant to the user's work)
 [1-2 headlines relevant to AI, startups, or OpoClaw's verticals]
 
 TODAY'S TOP 3
@@ -41,10 +41,10 @@ TODAY'S TOP 3
 
 ```bash
 # Check for pre-seeded brief context from nightly cycle
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT content FROM brief_context WHERE status='pending' ORDER BY created_at DESC LIMIT 5;" 2>/dev/null
 # If results exist, incorporate them into the brief and mark as used:
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "UPDATE brief_context SET status='used' WHERE status='pending';" 2>/dev/null
 ```
 
@@ -56,7 +56,7 @@ CAL_RESULT=$(curl -s "http://localhost:3001/api/calendar/events?date=$(date +%Y-
 echo "$CAL_RESULT"
 
 # Fallback: check local calendar_events table
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT title, start_time, end_time FROM calendar_events WHERE date(start_time) = date('now') ORDER BY start_time;" 2>/dev/null
 ```
 
@@ -76,7 +76,7 @@ except: pass
 ### OpoClaw agent overnight activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT agent_name, action, type, created_at FROM agent_activity
    WHERE created_at > datetime('now','-10 hours')
    ORDER BY created_at DESC LIMIT 10;" 2>/dev/null
@@ -85,14 +85,14 @@ sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
 ### Failed tasks (needs attention)
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT title, assignee_name FROM agent_tasks WHERE status='failed' AND created_at > datetime('now', '-24 hours') ORDER BY created_at DESC LIMIT 5;" 2>/dev/null
 ```
 
 ### In-progress tasks (carried over)
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT title, assignee_name, progress FROM agent_tasks WHERE status='in_progress' ORDER BY created_at DESC LIMIT 5;" 2>/dev/null
 ```
 
@@ -123,18 +123,18 @@ If a section has no data (no calendar events, no email), skip it — do not say 
 - **No Gmail access**: Skip PRIORITY INBOX section silently.
 - **No news pre-seeded**: Run a quick WebSearch for today's date.
 - **No agent activity overnight**: Skip AGENT STATUS or say "All agents idle overnight."
-- **Weekend morning**: Skip "Today's Top 3" if it's Saturday or Sunday and Gonzalo hasn't given any indication of working. Add a short personal note instead.
+- **Weekend morning**: Skip "Today's Top 3" if it's Saturday or Sunday and the user hasn't given any indication of working. Add a short personal note instead.
 
 ## Schedule automatically
 
 ```bash
 # Add to cron at 7am weekdays
-# node /Users/opoclaw1/claudeclaw/dist/schedule-cli.js create "Generate morning brief for Gonzalo" "0 7 * * 1-5"
+# node ${REPO_DIR}/dist/schedule-cli.js create "Generate morning brief for the user" "0 7 * * 1-5"
 ```
 
 ## Log completion
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
-  "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('maya-chen','Maya','🎯','Morning brief generated and sent to Gonzalo','success','operations',datetime('now'))"
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
+  "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('maya-chen','Maya','🎯','Morning brief generated and sent to the user','success','operations',datetime('now'))"
 ```

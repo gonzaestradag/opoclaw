@@ -7,7 +7,7 @@
 set -uo pipefail
 
 ENV_FILE="/Users/opoclaw1/claudeclaw/.env"
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 LOG="/Users/opoclaw1/claudeclaw/logs/trading-watchdog.log"
 ALERT_FLAG="/tmp/trading_auth_alert_sent"
 

@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 ENV_FILE="/Users/opoclaw1/claudeclaw/.env"
 
 # Load credentials (use grep with default empty to avoid unbound variable errors)

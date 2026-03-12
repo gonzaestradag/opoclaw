@@ -2,7 +2,7 @@
 # update-general-memory.sh — Updates the master system memory document
 # Runs weekly (or manually). This is the fallback brain for when things fail.
 
-DB_PATH="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB_PATH="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 NOW=$(date '+%Y-%m-%d %H:%M')
 
 # --- Top agents by completed tasks ---
@@ -43,7 +43,7 @@ Last updated: $NOW
 - 12 AI agents orchestrated by Thorn (COO)
 - Node.js gateway on port 4000 (PM2: openclaw-gateway)
 - Dashboard on port 3001 (PM2: dashboard-server)
-- SQLite DB: /Users/opoclaw1/claudeclaw/store/claudeclaw.db
+- SQLite DB: /Users/opoclaw1/claudeclaw/store/opoclaw.db
 - Neon PostgreSQL: secondary, used by gateway
 - ngrok tunnel: keisha-inescapable-clavately.ngrok-free.dev → localhost:3001
 

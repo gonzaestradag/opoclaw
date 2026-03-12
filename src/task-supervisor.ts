@@ -12,7 +12,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH   = path.join(__dirname, '../store/claudeclaw.db');
+const DB_PATH   = path.join(__dirname, '../store/opoclaw.db');
 const API_URL   = 'http://localhost:3001';
 
 const STUCK_THRESHOLD_MIN  = 25; // in_progress tasks older than this → reset

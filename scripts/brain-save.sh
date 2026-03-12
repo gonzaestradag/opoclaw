@@ -32,7 +32,7 @@ fi
 FILE_PATH="$1"
 FOLDER="${2:-Documentos}"
 BRAIN_ROOT="/Users/opoclaw1/claudeclaw/workspace/brain"
-DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
 
 if [ ! -f "$FILE_PATH" ]; then
   echo "ERROR: File not found: $FILE_PATH" >&2

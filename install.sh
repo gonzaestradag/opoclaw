@@ -662,7 +662,7 @@ import('${REPO_DIR}/dist/db.js').then(m => {
   process.exit(0);
 });
 " 2>/dev/null || true
-ok "Database ready at ${REPO_DIR}/store/claudeclaw.db"
+ok "Database ready at ${REPO_DIR}/store/opoclaw.db"
 
 # ============================================================
 # STEP 14 — PM2 setup
@@ -678,8 +678,8 @@ if [ -f "${REPO_DIR}/ecosystem.config.js" ] || [ -f "${REPO_DIR}/ecosystem.confi
   pm2 start "${ECOSYSTEM_FILE}" || warn "Some services failed to start. Check: pm2 list"
 else
   info "No ecosystem.config.js found. Starting core service directly..."
-  pm2 start "${REPO_DIR}/dist/index.js" --name "claudeclaw" --interpreter node \
-    --log "${REPO_DIR}/store/pm2-claudeclaw.log" \
+  pm2 start "${REPO_DIR}/dist/index.js" --name "opoclaw" --interpreter node \
+    --log "${REPO_DIR}/store/pm2-opoclaw.log" \
     --env production \
     2>/dev/null || true
 fi

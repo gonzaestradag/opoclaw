@@ -10,7 +10,7 @@ Generate hyper-personalized, high-converting cold outreach using proven framewor
 
 ## Triggers
 
-Use when Gonzalo wants to reach out to potential clients, partners, investors, or collaborators.
+Use when reaching out to potential clients, partners, investors, or collaborators.
 
 ## Frameworks available
 
@@ -45,7 +45,7 @@ Each message: subject line (if email), body, max 150 words.
 
 ## Save as file option
 
-If Gonzalo wants to save the sequence:
+If you want to save the sequence:
 ```bash
 cat > /tmp/outreach-$(date +%Y%m%d).md << 'CONTENT'
 [sequence here]

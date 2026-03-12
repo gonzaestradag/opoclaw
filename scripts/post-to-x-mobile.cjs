@@ -1,4 +1,4 @@
-const puppeteer = require('/Users/opoclaw1/claudeclaw/node_modules/puppeteer');
+const puppeteer = require('/Users/opoclaw1/opoclaw/node_modules/puppeteer');
 
 const USERNAME = 'Thornopoclaw';
 const PASSWORD = 'GOnza2002';

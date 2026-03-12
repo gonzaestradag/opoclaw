@@ -13,7 +13,7 @@ Track expenses and generate reports. Designed for Jordan (finance) in OpoClaw. T
 ```bash
 # Log a new expense
 DATE=$(date +%Y-%m-%d)
-cat >> /Users/opoclaw1/claudeclaw/workspace/expenses.csv << EOF
+cat >> ${REPO_DIR}/workspace/expenses.csv << EOF
 $DATE,[CATEGORY],[DESCRIPTION],[AMOUNT_USD],[VENDOR]
 EOF
 echo "Expense logged"
@@ -26,7 +26,7 @@ Categories: `ai-api`, `infrastructure`, `tools`, `marketing`, `misc`
 ```bash
 MONTH=$(date +%Y-%m)
 echo "=== Expenses for $MONTH ==="
-grep "^$MONTH" /Users/opoclaw1/claudeclaw/workspace/expenses.csv 2>/dev/null | \
+grep "^$MONTH" ${REPO_DIR}/workspace/expenses.csv 2>/dev/null | \
   awk -F',' '{sum+=$4; print $3, "$"$4} END {print "TOTAL: $"sum}'
 ```
 
@@ -53,7 +53,7 @@ for col, header in enumerate(headers, 1):
 
 # Load data
 try:
-    with open("/Users/opoclaw1/claudeclaw/workspace/expenses.csv") as f:
+    with open("${REPO_DIR}/workspace/expenses.csv") as f:
         reader = csv.reader(f)
         for row_num, row in enumerate(reader, 2):
             for col, val in enumerate(row, 1):
@@ -76,11 +76,11 @@ EOF
 ```bash
 # Check if over $50/month
 MONTH=$(date +%Y-%m)
-TOTAL=$(grep "^$MONTH" /Users/opoclaw1/claudeclaw/workspace/expenses.csv 2>/dev/null | awk -F',' '{sum+=$4} END {print sum+0}')
+TOTAL=$(grep "^$MONTH" ${REPO_DIR}/workspace/expenses.csv 2>/dev/null | awk -F',' '{sum+=$4} END {print sum+0}')
 BUDGET=50
 if (( $(echo "$TOTAL > $BUDGET" | bc -l) )); then
   echo "ALERT: Over budget! Spent $TOTAL of $BUDGET"
-  bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "Jordan: budget alert — gastamos $${TOTAL} de $${BUDGET} este mes"
+  bash ${REPO_DIR}/scripts/tg-notify.sh "Jordan: budget alert — gastamos $${TOTAL} de $${BUDGET} este mes"
 else
   echo "On track: $TOTAL / $BUDGET"
 fi
@@ -89,6 +89,6 @@ fi
 ## Log to Jordan's activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('jordan-walsh','Jordan','💰','Generated expense report','success','finance',datetime('now'))"
 ```

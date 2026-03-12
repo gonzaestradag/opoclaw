@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ClaudeClaw Schedule CLI
+ * OpoClaw Schedule CLI
  *
  * Used by your Claude assistant via the Bash tool to manage scheduled tasks.
  *

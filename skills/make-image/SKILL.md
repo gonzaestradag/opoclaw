@@ -21,7 +21,7 @@ Use this skill when the user asks to generate, create, or design an image or pho
 ## Step 1 — Generate the image
 
 ```bash
-OPENAI_KEY=$(grep OPENAI_API_KEY /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+OPENAI_KEY=$(grep OPENAI_API_KEY ${REPO_DIR}/.env | cut -d= -f2)
 
 RESPONSE=$(curl -s -X POST https://api.openai.com/v1/images/generations \
   -H "Authorization: Bearer $OPENAI_KEY" \

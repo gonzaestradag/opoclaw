@@ -8,9 +8,9 @@ allowed-tools: Bash
 
 Define, save, and apply a consistent brand voice across all content. Designed for Sofia (content) in OpoClaw.
 
-## Brand Voice Profile — OpoClaw / Gonzalo Estrada
+## Brand Voice Profile — YOUR_BRAND
 
-Stored at: `/Users/opoclaw1/claudeclaw/workspace/brand-voice.md`
+Stored at: `${REPO_DIR}/workspace/brand-voice.md`
 
 ### Tone
 - Direct, confident, no fluff
@@ -27,9 +27,9 @@ Stored at: `/Users/opoclaw1/claudeclaw/workspace/brand-voice.md`
 - Lead with the point, not the setup
 
 ### Voice descriptors
-- Gonzalo would say: "Esto ya funciona, lo siguiente es escalar."
+- Founder would say: "Esto ya funciona, lo siguiente es escalar."
 - Not: "We are excited to announce that after months of hard work..."
-- Gonzalo would say: "Jordan watches every dollar. That's the point."
+- Founder would say: "Jordan watches every dollar. That's the point."
 - Not: "Our financial management processes are robust and scalable."
 
 ## Usage
@@ -38,14 +38,14 @@ When writing any content (blog, LinkedIn, email, Telegram message), load this pr
 
 ```bash
 # Read current brand voice profile
-cat /Users/opoclaw1/claudeclaw/workspace/brand-voice.md 2>/dev/null || echo "No brand voice file yet — using defaults above"
+cat ${REPO_DIR}/workspace/brand-voice.md 2>/dev/null || echo "No brand voice file yet — using defaults above"
 ```
 
 ## Update brand voice
 
-If Gonzalo provides new examples or corrections:
+If the user provides new examples or corrections:
 ```bash
-cat >> /Users/opoclaw1/claudeclaw/workspace/brand-voice.md << 'EOF'
+cat >> ${REPO_DIR}/workspace/brand-voice.md << 'EOF'
 
 ## Update [DATE]
 [new rule or example]

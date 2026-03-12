@@ -12,9 +12,9 @@ Monitor context window usage and save checkpoints before things get lost. Critic
 
 ```bash
 # Get current session stats
-SESSION_ID=$(sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT session_id FROM sessions ORDER BY created_at DESC LIMIT 1;" 2>/dev/null || echo "unknown")
+SESSION_ID=$(sqlite3 ${REPO_DIR}/store/opoclaw.db "SELECT session_id FROM sessions ORDER BY created_at DESC LIMIT 1;" 2>/dev/null || echo "unknown")
 
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "
+sqlite3 ${REPO_DIR}/store/opoclaw.db "
   SELECT
     COUNT(*)             as turns,
     MAX(context_tokens)  as last_context,
@@ -25,7 +25,7 @@ sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "
 " 2>/dev/null || echo "No token_usage table found"
 
 # Baseline
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "
+sqlite3 ${REPO_DIR}/store/opoclaw.db "
   SELECT context_tokens FROM token_usage
   WHERE session_id = '$SESSION_ID'
   ORDER BY created_at ASC LIMIT 1;
@@ -40,14 +40,14 @@ Turns: N | Compactions: N | Cost: $X.XX
 
 ## Save checkpoint (checkpoint command)
 
-When Gonzalo says "checkpoint", save key decisions to memory:
+When the user says "checkpoint", save key decisions to memory:
 
 ```bash
-CHAT_ID=$(sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db "SELECT chat_id FROM sessions ORDER BY created_at DESC LIMIT 1;" 2>/dev/null || echo "unknown")
+CHAT_ID=$(sqlite3 ${REPO_DIR}/store/opoclaw.db "SELECT chat_id FROM sessions ORDER BY created_at DESC LIMIT 1;" 2>/dev/null || echo "unknown")
 
 python3 -c "
 import sqlite3, time
-db = sqlite3.connect('/Users/opoclaw1/claudeclaw/store/claudeclaw.db')
+db = sqlite3.connect('${REPO_DIR}/store/opoclaw.db')
 now = int(time.time())
 summary = '''[SUMMARY — 3-5 bullet points of key decisions/context from this session]'''
 try:
@@ -62,7 +62,7 @@ except Exception as e:
 
 ## Auto-warn threshold
 
-If context > 70%, warn Gonzalo:
+If context > 70%, warn the user:
 "Heads up: at 70% context. Run 'checkpoint' if there's anything critical to preserve before compaction."
 
 ## Compact strategy

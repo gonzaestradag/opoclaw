@@ -18,7 +18,7 @@ function resolveToken(): string {
 
   // 2. Fall back to oauth_tokens DB
   try {
-    const dbPath = path.join(__dirname, '..', 'store', 'claudeclaw.db');
+    const dbPath = path.join(__dirname, '..', 'store', 'opoclaw.db');
     const db = new Database(dbPath, { readonly: true });
     const row = db.prepare(`SELECT access_token FROM oauth_tokens WHERE provider = 'slack'`).get() as { access_token: string } | undefined;
     db.close();

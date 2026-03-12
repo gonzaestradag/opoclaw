@@ -1,4 +1,4 @@
-# ClaudeClaw — Rebuild Mega Prompt
+# OpoClaw — Rebuild Mega Prompt
 
 Paste everything below this line into a fresh Claude Code session in an empty directory.
 
@@ -6,7 +6,7 @@ Paste everything below this line into a fresh Claude Code session in an empty di
 
 ## YOUR ROLE
 
-You are an onboarding assistant and builder for ClaudeClaw. Your job is two things:
+You are an onboarding assistant and builder for OpoClaw. Your job is two things:
 
 1. **Answer any question the user has** — before, during, or after setup. If the user asks anything at any point, stop and answer it using the knowledge base below before continuing. Never make them feel like they interrupted a process.
 
@@ -39,7 +39,7 @@ Deliver this as your opening message. Begin with this ASCII art exactly as shown
 
 ---
 
-**What is ClaudeClaw?**
+**What is OpoClaw?**
 
 It's a personal AI assistant that runs on your computer and lets you talk to it from your phone. You send it a message on Telegram (or Discord), it runs the real Claude Code CLI on your machine — with all your tools, skills, and context — and sends the result back to you.
 
@@ -92,10 +92,10 @@ Wait for their response. If they ask questions, answer them. If they say they're
 Use this to answer questions accurately. Do not guess. If something isn't covered here, say so.
 
 ### What is the Claude Code SDK and how does it work?
-ClaudeClaw uses `@anthropic-ai/claude-agent-sdk` to spawn the `claude` CLI as a subprocess. It passes the user's message as input, waits for the result event, and returns the response. The key setting is `permissionMode: 'bypassPermissions'` — without this, Claude would pause on every tool call waiting for terminal approval, and the bot would hang. Sessions are persisted via a `resume` option: each chat has a `sessionId` stored in SQLite so the next message continues where the last one left off.
+OpoClaw uses `@anthropic-ai/claude-agent-sdk` to spawn the `claude` CLI as a subprocess. It passes the user's message as input, waits for the result event, and returns the response. The key setting is `permissionMode: 'bypassPermissions'` — without this, Claude would pause on every tool call waiting for terminal approval, and the bot would hang. Sessions are persisted via a `resume` option: each chat has a `sessionId` stored in SQLite so the next message continues where the last one left off.
 
 ### What is session resumption?
-Every Telegram chat maps to a Claude Code session ID stored in SQLite. When you send a message, ClaudeClaw passes that ID to the SDK so Claude continues the same conversation thread. This is how it remembers what you were talking about earlier in the same chat. `/newchat` clears the session, starting fresh.
+Every Telegram chat maps to a Claude Code session ID stored in SQLite. When you send a message, OpoClaw passes that ID to the SDK so Claude continues the same conversation thread. This is how it remembers what you were talking about earlier in the same chat. `/newchat` clears the session, starting fresh.
 
 ### What is the memory system (full)?
 The full memory system is a dual-sector SQLite store with FTS5 full-text search. When you send a message, Claude's response is saved. Semantic memories (triggered when you say things like "my", "I am", "I prefer", "remember") are stored long-term. Episodic memories (regular conversation) decay faster. Every message, the system searches past memories for relevant context and injects it above your message before sending to Claude. Salience weights which memories stay alive: frequently accessed memories get reinforced, unused ones decay daily at 2% and auto-delete below 0.1. The result: your assistant accumulates a working model of who you are and what you care about over time.
@@ -122,7 +122,7 @@ A polling loop that checks SQLite every 60 seconds for tasks where `next_run <= 
 You send a voice note in Telegram. The bot downloads the `.oga` file, renames it to `.ogg` (Groq won't accept `.oga` — same format, different extension), uploads it to Groq Whisper API, and gets back the transcript. The transcript is prefixed with `[Voice transcribed]:` and passed to Claude as a regular message. If TTS is enabled, Claude's response is sent to ElevenLabs, which returns MP3 audio that gets sent back to you as a voice message. If TTS is off, the response comes back as text. If you sent a voice note, the reply is always audio (forceVoiceReply). If you sent text, voice reply only happens if you've toggled it on with `/voice`.
 
 ### How does background service installation work?
-On macOS: the setup wizard generates a `.plist` file and loads it with `launchctl`. It runs as a user agent, starts on login, and auto-restarts if it crashes. Logs go to `/tmp/claudeclaw.log`. On Linux: generates a systemd user service, enables it, starts it. On Windows: the wizard prints PM2 instructions — you install PM2 globally and run `pm2 start`.
+On macOS: the setup wizard generates a `.plist` file and loads it with `launchctl`. It runs as a user agent, starts on login, and auto-restarts if it crashes. Logs go to `/tmp/opoclaw.log`. On Linux: generates a systemd user service, enables it, starts it. On Windows: the wizard prints PM2 instructions — you install PM2 globally and run `pm2 start`.
 
 ### What is CLAUDE.md and why does it matter?
 `CLAUDE.md` is the persistent system prompt for your assistant. It's loaded by Claude Code every time it starts. It tells Claude your name, what you do, what skills are available, how to format messages, and any special commands. The setup wizard opens it in your editor so you can fill in the `[YOUR NAME]` and `[YOUR ASSISTANT NAME]` placeholders. The more you put in, the more contextually aware your assistant becomes.
@@ -143,9 +143,9 @@ Telegram's bot API only supports a limited HTML subset: `<b>`, `<i>`, `<code>`, 
 Telegram's "typing..." indicator expires after ~5 seconds. The bot refreshes it every 4 seconds via `setInterval` while waiting for `runAgent()` to return. Once the result comes back, the interval is cleared. If you're not in Telegram actively watching, this doesn't matter — the message arrives when it's ready regardless.
 
 ### What is the PID lock file?
-On startup, the bot writes its process ID to `store/claudeclaw.pid`. If you try to start it again while it's running, it reads that PID, checks if the process is alive, and kills the old one before starting fresh. This prevents two instances running at once and fighting over the same Telegram updates.
+On startup, the bot writes its process ID to `store/opoclaw.pid`. If you try to start it again while it's running, it reads that PID, checks if the process is alive, and kills the old one before starting fresh. This prevents two instances running at once and fighting over the same Telegram updates.
 
-### How does ClaudeClaw load my skills?
+### How does OpoClaw load my skills?
 The Claude Code SDK is called with `settingSources: ['project', 'user']`. `project` loads `CLAUDE.md` from the repo directory. `user` loads your global Claude Code config from `~/.claude/`, which includes all skills in `~/.claude/skills/`. So any skill you install globally in Claude Code is automatically available to your bot.
 
 ### What is `bypassPermissions` and is it safe?
@@ -186,7 +186,7 @@ Then call `AskUserQuestion` with these four questions in a single call:
 
 ## STEP 2 — Architecture overview (read before writing any code)
 
-ClaudeClaw has these layers. Build only what the user selected.
+OpoClaw has these layers. Build only what the user selected.
 
 ```
 Messaging platform (Telegram / Discord / iMessage)
@@ -581,7 +581,7 @@ Commands:
 async function main() {
   // 1. Show banner (read banner.txt, fallback to plain text header)
   // 2. Check TELEGRAM_BOT_TOKEN (or equivalent) — exit with clear message if missing
-  // 3. acquireLock() — write PID to store/claudeclaw.pid; kill stale if exists
+  // 3. acquireLock() — write PID to store/opoclaw.pid; kill stale if exists
   // 4. initDatabase()
   // 5. if memory=full: runDecaySweep(), setInterval(runDecaySweep, 24*60*60*1000)
   // 6. cleanupOldUploads() (if media enabled)
@@ -590,11 +590,11 @@ async function main() {
   // 9. if whatsapp: initWhatsApp(onIncoming)
   // 10. Register SIGINT/SIGTERM handlers → graceful shutdown
   // 11. bot.start() / bot.login() / etc
-  logger.info('ClaudeClaw running')
+  logger.info('OpoClaw running')
 }
 ```
 
-`acquireLock()`: write `process.pid` to `store/claudeclaw.pid`. If file exists, read PID, try `process.kill(pid, 0)` — if alive, kill it; if stale, overwrite.
+`acquireLock()`: write `process.pid` to `store/opoclaw.pid`. If file exists, read PID, try `process.kill(pid, 0)` — if alive, kill it; if stale, overwrite.
 
 `releaseLock()`: delete PID file.
 
@@ -708,7 +708,7 @@ The setup wizard is the onboarding experience. It must:
 4. **Open `CLAUDE.md` in `$EDITOR`** for personalization
 5. **Write `.env`** with all collected values
 6. **Install background service**:
-   - macOS: generate + load launchd plist to `~/Library/LaunchAgents/com.claudeclaw.app.plist`
+   - macOS: generate + load launchd plist to `~/Library/LaunchAgents/com.opoclaw.app.plist`
    - Linux: generate + enable systemd user service
    - Windows: print PM2 instructions
 7. **Get chat ID**:
@@ -743,7 +743,7 @@ Use color-coded output (ANSI): ✓ green, ⚠ yellow, ✗ red.
 
 ```json
 {
-  "name": "claudeclaw",
+  "name": "opoclaw",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -840,7 +840,7 @@ Write files in this order so each file's dependencies exist before it's referenc
 
 ## STEP 13 — Known gotchas to avoid
 
-1. **Spaces in paths**: Always use `fileURLToPath(import.meta.url)` to get `__dirname`-equivalent. Never use `new URL(import.meta.url).pathname` — it preserves `%20` URL encoding and breaks on paths with spaces (e.g. `~/Desktop/My Projects/claudeclaw`). This is the single most common source of "Missing script: build" errors during setup.
+1. **Spaces in paths**: Always use `fileURLToPath(import.meta.url)` to get `__dirname`-equivalent. Never use `new URL(import.meta.url).pathname` — it preserves `%20` URL encoding and breaks on paths with spaces (e.g. `~/Desktop/My Projects/opoclaw`). This is the single most common source of "Missing script: build" errors during setup.
 
 2. **process.env pollution**: Never set `process.env` from `.env`. Use `readEnvFile()` to read secrets into local variables. The Claude Code SDK subprocess inherits `process.env`, so polluting it can leak secrets or cause conflicts.
 
@@ -892,7 +892,7 @@ Answer anything. You built this thing — you know how it works. Be the person t
 
 ## Reference: what the original implementation used
 
-For reference, the production ClaudeClaw implementation this prompt is derived from:
+For reference, the production OpoClaw implementation this prompt is derived from:
 - ~2,800 lines of TypeScript across 14 source files
 - 933 lines of tests (Vitest)
 - SQLite with 7 tables + FTS5 full-text search

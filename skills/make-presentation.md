@@ -23,7 +23,7 @@ After generating, sends the file to the user via Telegram using the `[SEND_FILE:
 
 ## How to Execute
 
-1. Parse Gonzalo's request to extract:
+1. Parse the request to extract:
    - **Topic / title** of the presentation
    - **Slides requested** (if specified) or infer a logical structure (5-8 slides typical)
    - **Content** for each slide (bullet points, table data, section headers)
@@ -34,9 +34,9 @@ After generating, sends the file to the user via Telegram using the `[SEND_FILE:
 
 4. Verify the file was created: `ls -lh /tmp/[topic-slug]-presentation.pptx`
 
-5. Save to Brain Vault: `bash /Users/opoclaw1/claudeclaw/scripts/brain-save.sh "/tmp/[topic-slug]-presentation.pptx" "Negocio"`
+5. Save to Brain Vault: `bash ${REPO_DIR}/scripts/brain-save.sh "/tmp/[topic-slug]-presentation.pptx" "Negocio"`
 
-6. Send to Gonzalo: include `[SEND_FILE:/tmp/[topic-slug]-presentation.pptx|[Topic] — Deck listo]` in your response.
+6. Send the file: include `[SEND_FILE:/tmp/[topic-slug]-presentation.pptx|[Topic] — Deck listo]` in your response.
 
 ---
 
@@ -93,7 +93,7 @@ BORDER     = RGBColor(0x1E, 0x3A, 0x4A)
 # ─── CONSTANTS ────────────────────────────────────────────────────────────────
 SLIDE_W   = Inches(13.33)
 SLIDE_H   = Inches(7.5)
-LOGO_PATH = "/Users/opoclaw1/claudeclaw/workspace/opoclaw-logo-hd.png"
+LOGO_PATH = "${REPO_DIR}/workspace/opoclaw-logo-hd.png"  # update to your logo path
 OUTPUT    = "/tmp/TOPIC-presentation.pptx"  # <-- change TOPIC per deck
 
 
@@ -174,7 +174,7 @@ def make_cover_slide(prs, title, subtitle, date=None):
     add_text_box(slide, date_str,
         left=Inches(0.5), top=Inches(6.6), width=Inches(4), height=Inches(0.4),
         font_size=12, color=MUTED, align=PP_ALIGN.LEFT)
-    add_text_box(slide, "opoclaw.com",
+    add_text_box(slide, "YOUR_WEBSITE",
         left=Inches(9.5), top=Inches(6.6), width=Inches(3.5), height=Inches(0.4),
         font_size=11, color=MUTED, align=PP_ALIGN.RIGHT)
     add_logo(slide, right_margin=Inches(0.4), top_margin=Inches(0.25), width=Inches(1.4))
@@ -308,7 +308,7 @@ def make_closing_slide(prs, title="Thank You", subtitle=None):
         add_text_box(slide, subtitle,
             left=Inches(2), top=Inches(3.9), width=Inches(9.33), height=Inches(0.7),
             font_size=20, color=TEAL_LIGHT, align=PP_ALIGN.CENTER)
-    add_text_box(slide, "www.opoclaw.com  |  your@email.com",
+    add_text_box(slide, "YOUR_WEBSITE  |  YOUR_EMAIL",
         left=Inches(3), top=Inches(6.88), width=Inches(7.33), height=Inches(0.4),
         font_size=13, color=WHITE, align=PP_ALIGN.CENTER)
     add_logo(slide, right_margin=Inches(0.4), top_margin=Inches(0.3), width=Inches(1.4))
@@ -403,8 +403,8 @@ if __name__ == "__main__":
 ## Output Rules
 
 - Save file to: `/tmp/[topic-slug]-presentation.pptx`
-- Save to Brain Vault: `bash /Users/opoclaw1/claudeclaw/scripts/brain-save.sh "/tmp/[topic-slug]-presentation.pptx" "Negocio"`
-- Always send to Gonzalo via Telegram: `[SEND_FILE:/tmp/[topic-slug]-presentation.pptx|[Topic] deck listo]`
+- Save to Brain Vault: `bash ${REPO_DIR}/scripts/brain-save.sh "/tmp/[topic-slug]-presentation.pptx" "Negocio"`
+- Always send via Telegram: `[SEND_FILE:/tmp/[topic-slug]-presentation.pptx|[Topic] deck listo]`
 - Never send just a text summary — always send the actual file.
 
 ---

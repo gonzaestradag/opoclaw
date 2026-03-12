@@ -1,6 +1,6 @@
 # Dashboard — Pages Reference
 
-ClaudeClaw includes a full React web dashboard. It runs locally on port 3001 and shows everything happening inside your system in real time.
+OpoClaw includes a full React web dashboard. It runs locally on port 3001 and shows everything happening inside your system in real time.
 
 Open it from Telegram with `/dashboard`, or go to `http://localhost:3001` in your browser.
 
@@ -134,7 +134,7 @@ Agents with the right prompt can read from Brain Vault when answering questions.
 
 ### Memory Viewer
 
-Browse everything ClaudeClaw remembers about you.
+Browse everything OpoClaw remembers about you.
 
 - **All memories** — sorted by salience (highest = most important, most used)
 - **Semantic** — long-lived facts (preferences, habits, context)
@@ -234,7 +234,7 @@ Add revenue events manually or have agents log them automatically when they proc
 Your Claude Code skills library.
 
 - **Installed** — every skill in `~/.claude/skills/` (auto-detected)
-- **Available** — skills that ship with ClaudeClaw but aren't installed yet
+- **Available** — skills that ship with OpoClaw but aren't installed yet
 - **Add skill** — install a new skill from a URL or local path
 - **Configure** — view and edit each skill's `SKILL.md`
 

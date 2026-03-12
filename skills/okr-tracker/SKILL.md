@@ -1,30 +1,30 @@
 ---
 name: okr-tracker
-description: Set, track, and review OKRs (Objectives and Key Results) for Gonzalo's ventures. Triggers on: "set OKRs", "review OKRs", "track goals", "objectivos y resultados clave", "mis metas del trimestre", "quarterly goals", "OKR check-in", "update my goals".
+description: Set, track, and review OKRs (Objectives and Key Results). Triggers on: "set OKRs", "review OKRs", "track goals", "objectivos y resultados clave", "mis metas del trimestre", "quarterly goals", "OKR check-in", "update my goals".
 allowed-tools: Bash
 ---
 
 # okr-tracker
 
-Set and track OKRs for Gonzalo's business. Backed by SQLite, visible in the dashboard. Designed for Thorn to manage on Gonzalo's behalf.
+Set and track OKRs for your business. Backed by SQLite, visible in the dashboard.
 
 ## Storage
 
-OKRs are stored in: `/Users/opoclaw1/claudeclaw/store/claudeclaw.db` in the `tasks` table (using type=okr).
+OKRs are stored in: `${REPO_DIR}/store/opoclaw.db` in the `tasks` table (using type=okr).
 
-Or as a markdown file: `/Users/opoclaw1/claudeclaw/workspace/okrs.md`
+Or as a markdown file: `${REPO_DIR}/workspace/okrs.md`
 
 ## Commands
 
 ### View current OKRs
 ```bash
-cat /Users/opoclaw1/claudeclaw/workspace/okrs.md 2>/dev/null || echo "No OKRs file yet"
+cat ${REPO_DIR}/workspace/okrs.md 2>/dev/null || echo "No OKRs file yet"
 ```
 
 ### Set new OKR (quarterly)
 ```bash
 QUARTER=$(date +Q%q-%Y)
-cat > /Users/opoclaw1/claudeclaw/workspace/okrs.md << EOF
+cat > ${REPO_DIR}/workspace/okrs.md << EOF
 # OKRs — $QUARTER
 
 ## O1: [OBJECTIVE — ambitious, qualitative]
@@ -57,6 +57,6 @@ Calculate completion % for each KR. Target: 0.7 is good. 1.0 means too easy.
 
 ## Log update
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('thorn','Thorn','🌵','Updated OKR tracker','success','executive',datetime('now'))"
 ```
