@@ -131,8 +131,17 @@ async function uploadAudioToHeyGen(audioPath, apiKey) {
 }
 
 // ── Step 3: Create HeyGen video ──────────────────────────────────────────────
-async function createHeyGenVideo(audioUrl, avatarId, title, apiKey) {
+async function createHeyGenVideo(audioUrl, avatarId, title, apiKey, format) {
   console.log('[3/4] Creating HeyGen video...');
+
+  // format: 'portrait' = 720x1280 (reel/stories), 'landscape' = 1280x720 (desktop), 'square' = 1080x1080
+  const dimensions = {
+    portrait:  { width: 720,  height: 1280 },
+    landscape: { width: 1280, height: 720  },
+    square:    { width: 1080, height: 1080 },
+  };
+  const dim = dimensions[format] || dimensions.landscape;
+  console.log(`    Format: ${format || 'landscape'} (${dim.width}x${dim.height})`);
 
   const payload = JSON.stringify({
     title: title || 'Thorn Report',
@@ -150,7 +159,7 @@ async function createHeyGenVideo(audioUrl, avatarId, title, apiKey) {
         value: '#0a0e1a',
       },
     }],
-    dimension: { width: 1280, height: 720 },
+    dimension: dim,
     test: false,
   });
 
@@ -306,6 +315,8 @@ async function main() {
   let scriptText = process.argv[2];
   const title    = process.argv[3] || 'Thorn — Video Report';
   const outPath  = process.argv[4] || `/tmp/thorn_video_${Date.now()}.mp4`;
+  // format: 'portrait' | 'landscape' | 'square' (default: landscape)
+  const format   = process.argv[5] || 'landscape';
 
   if (!scriptText) {
     // Read from stdin
@@ -327,7 +338,7 @@ async function main() {
 
   const audioPath = await generateAudio(scriptText, elevenKey, elevenVoice);
   const audioUrl  = await uploadAudioToHeyGen(audioPath, heygenKey);
-  const videoId   = await createHeyGenVideo(audioUrl, avatarId, title, heygenKey);
+  const videoId   = await createHeyGenVideo(audioUrl, avatarId, title, heygenKey, format);
 
   logActivity(`Video en render — ID: ${videoId}`);
 

@@ -13,15 +13,57 @@
 
 ---
 
-## Install in 3 commands
+## Install — 3 steps, no config files, no broken scripts
+
+### Step 0 — Do this once (5 min)
+
+You need three things installed before anything else:
+
+```bash
+# 1. Install Node.js 20+ if you don't have it
+#    Download from: https://nodejs.org  (pick the LTS version)
+#    Then verify: node --version  → should say v20 or higher
+
+# 2. Install Claude Code CLI
+npm i -g @anthropic-ai/claude-code
+
+# 3. Log in with your Claude account (free, Pro, or Max)
+claude login
+```
+
+You also need a **Telegram bot token**. Get one in 2 minutes:
+1. Open Telegram → search **@BotFather**
+2. Send `/newbot` → follow the prompts
+3. Copy the token it gives you (looks like `1234567890:AAFxxxxxxx`)
+
+---
+
+### Step 1 — Clone and open
 
 ```bash
 git clone https://github.com/gonzaestradag/opoclaw
 cd opoclaw
-bash install.sh
+claude
 ```
 
-The wizard walks you through everything — API keys, agents, dashboard, Cloudflare tunnel, Google OAuth, Vapi, Binance, VisionClaw. Takes about 10 minutes. Zero manual config.
+---
+
+### Step 2 — Tell Claude to install everything
+
+Once Claude Code opens, type exactly this:
+
+```
+help me install and configure everything
+```
+
+Claude reads the project, runs `npm install`, asks you for each API key one by one (Telegram, ElevenLabs, etc.), writes your `.env`, builds the project, and starts everything with PM2.
+
+**That's it. Takes about 10 minutes.**
+
+---
+
+> **Why not `bash install.sh`?**
+> The bash script can silently die mid-install if any npm package has a version conflict. Claude Code handles errors in real time — if something breaks, it fixes it and keeps going. It's the recommended path and the one that actually works reliably.
 
 ---
 
