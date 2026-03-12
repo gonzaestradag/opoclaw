@@ -4,8 +4,23 @@
 
 **If the file `.env` does not exist in this directory**, this is a brand new install. Do the following immediately, before anything else:
 
-1. Say: "Welcome to OpoClaw. I'll get you set up — this takes about 10 minutes."
-2. Run `npm install` (show output so the user can see progress)
+1. Ask (in both languages at once):
+   ```
+   Welcome to OpoClaw!
+   Bienvenido a OpoClaw!
+
+   Choose your language / Elige tu idioma:
+     1. English
+     2. Español
+   ```
+2. Wait for their answer. Then ask again to confirm:
+   - If they said English: "You selected **English**. Confirm? (yes / no)"
+   - If they said Español: "Elegiste **Español**. ¿Confirmamos? (sí / no)"
+   If they say no, go back to step 1.
+   All following steps must be in the confirmed language.
+
+3. Say (in their language): "Great, let's get you set up — this takes about 10 minutes." / "Perfecto, vamos a configurar todo — tarda unos 10 minutos."
+4. Run `npm install` (show output so the user can see progress)
 3. If npm install fails, diagnose and fix the error, then retry
 4. Run `npm run build`
 5. Walk the user through creating `.env` by asking for each key one at a time:
