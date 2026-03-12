@@ -15,6 +15,7 @@ const envConfig = readEnvFile([
   'DASHBOARD_PORT',
   'DASHBOARD_TOKEN',
   'DASHBOARD_URL',
+  'BOT_INJECT_PORT',
 ]);
 
 export const TELEGRAM_BOT_TOKEN =
@@ -67,3 +68,10 @@ export const DASHBOARD_TOKEN =
   process.env.DASHBOARD_TOKEN || envConfig.DASHBOARD_TOKEN || '';
 export const DASHBOARD_URL =
   process.env.DASHBOARD_URL || envConfig.DASHBOARD_URL || '';
+
+// Local HTTP port used by thorn-bot to receive programmatic message injections
+// (e.g. call transcripts from dashboard-server). Only binds on 127.0.0.1.
+export const BOT_INJECT_PORT = parseInt(
+  process.env.BOT_INJECT_PORT || envConfig.BOT_INJECT_PORT || '3142',
+  10,
+);

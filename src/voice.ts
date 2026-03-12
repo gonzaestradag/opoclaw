@@ -26,6 +26,7 @@ function httpsRequest(
   url: string,
   options: https.RequestOptions,
   body?: Buffer | string,
+  timeoutMs = 30000,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const req = https.request(url, options, (res) => {
@@ -45,6 +46,10 @@ function httpsRequest(
       });
       res.on('error', reject);
     });
+    req.setTimeout(timeoutMs, () => {
+      req.destroy();
+      reject(new Error(`httpsRequest timed out after ${timeoutMs}ms: ${url}`));
+    });
     req.on('error', reject);
     if (body) req.write(body);
     req.end();
@@ -54,40 +59,41 @@ function httpsRequest(
 /**
  * Convenience wrapper for HTTPS GET that returns a Buffer.
  */
-function httpsGet(url: string): Promise<Buffer> {
+function httpsGet(url: string, timeoutMs = 20000): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      // Follow a single redirect if present
-      if (
-        res.statusCode &&
-        res.statusCode >= 300 &&
-        res.statusCode < 400 &&
-        res.headers.location
-      ) {
-        https.get(res.headers.location, (res2) => {
-          const chunks: Buffer[] = [];
-          res2.on('data', (chunk: Buffer) => chunks.push(chunk));
-          res2.on('end', () => resolve(Buffer.concat(chunks)));
-          res2.on('error', reject);
-        }).on('error', reject);
-        return;
-      }
-      const chunks: Buffer[] = [];
-      res.on('data', (chunk: Buffer) => chunks.push(chunk));
-      res.on('end', () => {
-        const buf = Buffer.concat(chunks);
-        if (res.statusCode && res.statusCode >= 400) {
-          reject(
-            new Error(
-              `HTTP ${res.statusCode}: ${buf.toString('utf-8').slice(0, 500)}`,
-            ),
-          );
+    const doGet = (targetUrl: string, redirected = false) => {
+      const req = https.get(targetUrl, (res) => {
+        // Follow a single redirect if present
+        if (
+          !redirected &&
+          res.statusCode &&
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          res.destroy(); // Release socket before following redirect
+          doGet(res.headers.location, true);
           return;
         }
-        resolve(buf);
+        const chunks: Buffer[] = [];
+        res.on('data', (chunk: Buffer) => chunks.push(chunk));
+        res.on('end', () => {
+          const buf = Buffer.concat(chunks);
+          if (res.statusCode && res.statusCode >= 400) {
+            reject(new Error(`HTTP ${res.statusCode}: ${buf.toString('utf-8').slice(0, 500)}`));
+            return;
+          }
+          resolve(buf);
+        });
+        res.on('error', reject);
       });
-      res.on('error', reject);
-    }).on('error', reject);
+      req.setTimeout(timeoutMs, () => {
+        req.destroy();
+        reject(new Error(`Request timed out after ${timeoutMs}ms: ${targetUrl}`));
+      });
+      req.on('error', reject);
+    };
+    doGet(url);
   });
 }
 
@@ -205,9 +211,31 @@ export async function transcribeAudio(filePath: string): Promise<string> {
 
 // ── TTS: ElevenLabs ─────────────────────────────────────────────────────────
 
+// ElevenLabs enforces a per-request character limit. 2500 is safe across all plans.
+const TTS_MAX_CHARS = 2500;
+
+// Retry config: up to 3 attempts, delays 1s → 3s → 9s (exponential)
+const TTS_MAX_ATTEMPTS = 3;
+const TTS_RETRY_BASE_MS = 1000;
+
+/**
+ * Determine whether an HTTP error status is worth retrying.
+ * 429 (rate limit) and 5xx (server errors) are retryable.
+ * 4xx (except 429) are permanent failures — don't retry.
+ */
+function isTtsRetryableStatus(statusCode: number): boolean {
+  return statusCode === 429 || statusCode >= 500;
+}
+
 /**
  * Convert text to speech using ElevenLabs and return the audio as a Buffer.
  * Uses the voice ID from ELEVENLABS_VOICE_ID in .env.
+ *
+ * Improvements over the original:
+ * - Truncates text to TTS_MAX_CHARS to stay within ElevenLabs limits.
+ * - Retries up to TTS_MAX_ATTEMPTS times with exponential backoff on transient errors
+ *   (rate limits, server errors, network failures).
+ * - Fails fast on permanent errors (bad API key, invalid voice ID, etc.).
  */
 export async function synthesizeSpeech(text: string): Promise<Buffer> {
   const env = readEnvFile(['ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID']);
@@ -221,30 +249,66 @@ export async function synthesizeSpeech(text: string): Promise<Buffer> {
     throw new Error('ELEVENLABS_VOICE_ID not set in .env');
   }
 
+  // Truncate to stay within ElevenLabs character limit.
+  // If truncated, end on the last sentence boundary to avoid mid-sentence cut.
+  let safeText = text.length > TTS_MAX_CHARS ? text.slice(0, TTS_MAX_CHARS) : text;
+  if (text.length > TTS_MAX_CHARS) {
+    const lastPeriod = Math.max(safeText.lastIndexOf('. '), safeText.lastIndexOf('.\n'));
+    if (lastPeriod > TTS_MAX_CHARS / 2) {
+      safeText = safeText.slice(0, lastPeriod + 1);
+    }
+  }
+
   const payload = JSON.stringify({
-    text,
-    model_id: 'eleven_turbo_v2_5',
+    text: safeText,
+    model_id: 'eleven_multilingual_v2',
     voice_settings: {
-      stability: 0.5,
-      similarity_boost: 0.75,
+      stability: 0.90,       // Higher stability = consistent voice across long texts (ElevenLabs internal chunks)
+      similarity_boost: 0.80, // Slightly lower to reduce artifacts on long-form synthesis
+      style: 0.0,
+      use_speaker_boost: true,
     },
   });
 
-  const audioBuffer = await httpsRequest(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-    {
-      method: 'POST',
-      headers: {
-        'xi-api-key': apiKey,
-        'Content-Type': 'application/json',
-        Accept: 'audio/mpeg',
-        'Content-Length': Buffer.byteLength(payload).toString(),
-      },
-    },
-    payload,
-  );
+  let lastError: Error = new Error('TTS: no attempts made');
 
-  return audioBuffer;
+  for (let attempt = 1; attempt <= TTS_MAX_ATTEMPTS; attempt++) {
+    try {
+      const audioBuffer = await httpsRequest(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        {
+          method: 'POST',
+          headers: {
+            'xi-api-key': apiKey,
+            'Content-Type': 'application/json',
+            Accept: 'audio/mpeg',
+            'Content-Length': Buffer.byteLength(payload).toString(),
+          },
+        },
+        payload,
+      );
+      return audioBuffer;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+
+      // Check if this is a permanent HTTP error (e.g. 401, 403, 400)
+      const match = lastError.message.match(/^HTTP (\d+):/);
+      if (match) {
+        const status = parseInt(match[1]);
+        if (!isTtsRetryableStatus(status)) {
+          // Permanent error — fail immediately, no retry
+          throw lastError;
+        }
+      }
+
+      if (attempt < TTS_MAX_ATTEMPTS) {
+        const delayMs = TTS_RETRY_BASE_MS * Math.pow(3, attempt - 1); // 1s, 3s, 9s
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 // ── Capabilities check ──────────────────────────────────────────────────────

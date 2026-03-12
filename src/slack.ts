@@ -1,19 +1,46 @@
 import { WebClient } from '@slack/web-api';
+import Database from 'better-sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { SLACK_USER_TOKEN } from './config.js';
 import { saveSlackMessage } from './db.js';
 import { logger } from './logger.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 let client: WebClient | null = null;
+
+function resolveToken(): string {
+  // 1. Try env var (set at startup or dynamically via connect endpoint)
+  if (SLACK_USER_TOKEN) return SLACK_USER_TOKEN;
+  if (process.env['SLACK_USER_TOKEN']) return process.env['SLACK_USER_TOKEN'];
+
+  // 2. Fall back to oauth_tokens DB
+  try {
+    const dbPath = path.join(__dirname, '..', 'store', 'claudeclaw.db');
+    const db = new Database(dbPath, { readonly: true });
+    const row = db.prepare(`SELECT access_token FROM oauth_tokens WHERE provider = 'slack'`).get() as { access_token: string } | undefined;
+    db.close();
+    if (row?.access_token) return row.access_token;
+  } catch {
+    // DB not available — fall through
+  }
+
+  throw new Error('SLACK_USER_TOKEN not set. Go to Settings and connect your Slack workspace.');
+}
 
 function getClient(): WebClient {
   if (!client) {
-    if (!SLACK_USER_TOKEN) {
-      throw new Error('SLACK_USER_TOKEN not set in .env');
-    }
-    client = new WebClient(SLACK_USER_TOKEN);
+    const token = resolveToken();
+    client = new WebClient(token);
   }
   return client;
+}
+
+// Reset client when token changes (e.g., after connecting via dashboard)
+export function resetSlackClient(): void {
+  client = null;
 }
 
 // ── Types ───────────────────────────────────────────────────────────

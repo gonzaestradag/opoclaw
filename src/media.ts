@@ -45,6 +45,7 @@ function httpsDownload(url: string, dest: string): Promise<void> {
     https.get(url, (res) => {
       // Follow redirects
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.destroy(); // Release socket before recursing
         httpsDownload(res.headers.location, dest).then(resolve, reject);
         return;
       }

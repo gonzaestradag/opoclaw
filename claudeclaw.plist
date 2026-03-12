@@ -22,8 +22,8 @@
     launchctl unload ~/Library/LaunchAgents/com.claudeclaw.app.plist
 
   Logs:
-    tail -f /tmp/claudeclaw.log
-    tail -f /tmp/claudeclaw.err
+    tail -f PATH_TO_CLAUDECLAW/logs/claudeclaw.log
+    tail -f PATH_TO_CLAUDECLAW/logs/claudeclaw.err
 -->
 <plist version="1.0">
 <dict>
@@ -45,12 +45,12 @@
   <true/>
 
   <key>ThrottleInterval</key>
-  <integer>5</integer>
+  <integer>30</integer>
 
   <key>StandardOutPath</key>
-  <string>/tmp/claudeclaw.log</string>
+  <string>PATH_TO_CLAUDECLAW/logs/claudeclaw.log</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/claudeclaw.err</string>
+  <string>PATH_TO_CLAUDECLAW/logs/claudeclaw.err</string>
 
   <key>EnvironmentVariables</key>
   <dict>

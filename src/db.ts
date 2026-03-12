@@ -22,9 +22,10 @@ function createSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_tasks_next_run ON scheduled_tasks(status, next_run);
 
     CREATE TABLE IF NOT EXISTS sessions (
-      chat_id   TEXT PRIMARY KEY,
-      session_id TEXT NOT NULL,
-      updated_at TEXT NOT NULL
+      chat_id      TEXT PRIMARY KEY,
+      session_id   TEXT NOT NULL,
+      updated_at   TEXT NOT NULL,
+      voice_enabled INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS memories (
@@ -34,12 +35,17 @@ function createSchema(database: Database.Database): void {
       content     TEXT NOT NULL,
       sector      TEXT NOT NULL DEFAULT 'semantic',
       salience    REAL NOT NULL DEFAULT 1.0,
+      source      TEXT NOT NULL DEFAULT 'telegram',
       created_at  INTEGER NOT NULL,
       accessed_at INTEGER NOT NULL
     );
 
     CREATE INDEX IF NOT EXISTS idx_memories_chat ON memories(chat_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_memories_sector ON memories(chat_id, sector);
+    CREATE INDEX IF NOT EXISTS idx_memories_sector_only ON memories(sector);
+    CREATE INDEX IF NOT EXISTS idx_memories_salience ON memories(salience DESC);
+    CREATE INDEX IF NOT EXISTS idx_memories_chat_id ON memories(chat_id);
+    CREATE INDEX IF NOT EXISTS idx_memories_created_at ON memories(created_at DESC);
 
     CREATE TABLE IF NOT EXISTS wa_message_map (
       telegram_msg_id INTEGER PRIMARY KEY,
@@ -76,6 +82,7 @@ function createSchema(database: Database.Database): void {
       session_id  TEXT,
       role        TEXT NOT NULL,
       content     TEXT NOT NULL,
+      source      TEXT NOT NULL DEFAULT 'telegram',
       created_at  INTEGER NOT NULL
     );
 
@@ -110,6 +117,21 @@ function createSchema(database: Database.Database): void {
 
     CREATE INDEX IF NOT EXISTS idx_slack_messages_channel ON slack_messages(channel_id, created_at DESC);
 
+    CREATE TABLE IF NOT EXISTS agent_activity (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      agent_id    TEXT NOT NULL DEFAULT 'thorn',
+      agent_name  TEXT NOT NULL DEFAULT 'Thorn',
+      agent_emoji TEXT NOT NULL DEFAULT '🌵',
+      action      TEXT NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'info',
+      department  TEXT,
+      metadata    TEXT,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_agent_activity_created_at ON agent_activity(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_agent_activity_agent_id ON agent_activity(agent_id, created_at DESC);
+
     CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
       content,
       content=memories,
@@ -128,6 +150,46 @@ function createSchema(database: Database.Database): void {
       INSERT INTO memories_fts(memories_fts, rowid, content) VALUES ('delete', old.id, old.content);
       INSERT INTO memories_fts(rowid, content) VALUES (new.id, new.content);
     END;
+
+    CREATE TABLE IF NOT EXISTS brain_vault (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      title       TEXT NOT NULL,
+      content     TEXT NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'document',
+      agent_id    TEXT,
+      agent_name  TEXT,
+      department  TEXT,
+      tags        TEXT,
+      source_task_id TEXT,
+      starred     INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
+      folder_path TEXT NOT NULL DEFAULT 'Varios'
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_brain_vault_agent ON brain_vault(agent_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_brain_vault_dept ON brain_vault(department, created_at);
+    CREATE INDEX IF NOT EXISTS idx_brain_vault_folder ON brain_vault(folder_path, created_at);
+
+    CREATE VIRTUAL TABLE IF NOT EXISTS brain_vault_fts USING fts5(
+      title,
+      content,
+      content=brain_vault,
+      content_rowid=id
+    );
+
+    CREATE TRIGGER IF NOT EXISTS brain_vault_fts_insert AFTER INSERT ON brain_vault BEGIN
+      INSERT INTO brain_vault_fts(rowid, title, content) VALUES (new.id, new.title, new.content);
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS brain_vault_fts_delete AFTER DELETE ON brain_vault BEGIN
+      INSERT INTO brain_vault_fts(brain_vault_fts, rowid, title, content) VALUES ('delete', old.id, old.title, old.content);
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS brain_vault_fts_update AFTER UPDATE ON brain_vault BEGIN
+      INSERT INTO brain_vault_fts(brain_vault_fts, rowid, title, content) VALUES ('delete', old.id, old.title, old.content);
+      INSERT INTO brain_vault_fts(rowid, title, content) VALUES (new.id, new.title, new.content);
+    END;
   `);
 }
 
@@ -142,11 +204,42 @@ export function initDatabase(): void {
 
 /** Add columns that may not exist in older databases. */
 function runMigrations(database: Database.Database): void {
-  // Add context_tokens column to token_usage (introduced for accurate context tracking)
-  const cols = database.prepare(`PRAGMA table_info(token_usage)`).all() as Array<{ name: string }>;
-  const hasContextTokens = cols.some((c) => c.name === 'context_tokens');
-  if (!hasContextTokens) {
+  // Add context_tokens column to token_usage
+  const tokenCols = database.prepare(`PRAGMA table_info(token_usage)`).all() as Array<{ name: string }>;
+  if (!tokenCols.some((c) => c.name === 'context_tokens')) {
     database.exec(`ALTER TABLE token_usage ADD COLUMN context_tokens INTEGER NOT NULL DEFAULT 0`);
+  }
+
+  // Add voice_enabled column to sessions
+  const sessionCols = database.prepare(`PRAGMA table_info(sessions)`).all() as Array<{ name: string }>;
+  if (!sessionCols.some((c) => c.name === 'voice_enabled')) {
+    database.exec(`ALTER TABLE sessions ADD COLUMN voice_enabled INTEGER NOT NULL DEFAULT 0`);
+  }
+
+  // Add retry_count column to scheduled_tasks
+  const taskCols = database.prepare(`PRAGMA table_info(scheduled_tasks)`).all() as Array<{ name: string }>;
+  if (!taskCols.some((c) => c.name === 'retry_count')) {
+    database.exec(`ALTER TABLE scheduled_tasks ADD COLUMN retry_count INTEGER NOT NULL DEFAULT 0`);
+  }
+
+  // Add source column to memories (tracks which channel created the memory)
+  const memoryCols = database.prepare(`PRAGMA table_info(memories)`).all() as Array<{ name: string }>;
+  if (!memoryCols.some((c) => c.name === 'source')) {
+    database.exec(`ALTER TABLE memories ADD COLUMN source TEXT NOT NULL DEFAULT 'telegram'`);
+  }
+
+  // Add source column to conversation_log (tracks which channel logged the turn)
+  const convoLogCols = database.prepare(`PRAGMA table_info(conversation_log)`).all() as Array<{ name: string }>;
+  if (!convoLogCols.some((c) => c.name === 'source')) {
+    database.exec(`ALTER TABLE conversation_log ADD COLUMN source TEXT NOT NULL DEFAULT 'telegram'`);
+  }
+
+  // Rebuild brain_vault_fts from existing brain_vault data.
+  // Uses FTS5 'rebuild' command which repopulates from the content= source table.
+  try {
+    database.exec(`INSERT INTO brain_vault_fts(brain_vault_fts) VALUES('rebuild')`);
+  } catch {
+    // FTS table may not exist on very old schemas — safe to skip
   }
 }
 
@@ -183,21 +276,26 @@ export interface Memory {
   content: string;
   sector: string;
   salience: number;
+  source: string;
   created_at: number;
   accessed_at: number;
 }
+
+/** Valid input channels that can write to the shared memory pool. */
+export type MemorySource = 'telegram' | 'vapi' | 'glasses' | 'whatsapp' | 'slack';
 
 export function saveMemory(
   chatId: string,
   content: string,
   sector = 'semantic',
   topicKey?: string,
+  source: MemorySource = 'telegram',
 ): void {
   const now = Math.floor(Date.now() / 1000);
   db.prepare(
-    `INSERT INTO memories (chat_id, content, sector, topic_key, created_at, accessed_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-  ).run(chatId, content, sector, topicKey ?? null, now, now);
+    `INSERT INTO memories (chat_id, content, sector, topic_key, source, created_at, accessed_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  ).run(chatId, content, sector, topicKey ?? null, source, now, now);
 }
 
 export function searchMemories(
@@ -261,6 +359,7 @@ export interface ScheduledTask {
   last_run: number | null;
   last_result: string | null;
   status: 'active' | 'paused';
+  retry_count: number;
   created_at: number;
 }
 
@@ -299,8 +398,26 @@ export function updateTaskAfterRun(
 ): void {
   const now = Math.floor(Date.now() / 1000);
   db.prepare(
-    `UPDATE scheduled_tasks SET last_run = ?, next_run = ?, last_result = ? WHERE id = ?`,
+    `UPDATE scheduled_tasks SET last_run = ?, next_run = ?, last_result = ?, retry_count = 0 WHERE id = ?`,
   ).run(now, nextRun, result.slice(0, 500), id);
+}
+
+/**
+ * Schedule a retry for a failed task.
+ * Sets next_run to now + delaySecs and increments retry_count.
+ * Also records the error in last_result for visibility.
+ */
+export function updateTaskForRetry(
+  id: string,
+  delaySecs: number,
+  retryCount: number,
+  errorMsg: string,
+): void {
+  const now = Math.floor(Date.now() / 1000);
+  const retryAt = now + delaySecs;
+  db.prepare(
+    `UPDATE scheduled_tasks SET last_run = ?, next_run = ?, last_result = ?, retry_count = ? WHERE id = ?`,
+  ).run(now, retryAt, `RETRY ${retryCount}: ${errorMsg.slice(0, 450)}`, retryCount, id);
 }
 
 export function deleteScheduledTask(id: string): void {
@@ -382,6 +499,7 @@ export interface ConversationTurn {
   session_id: string | null;
   role: string;
   content: string;
+  source: string;
   created_at: number;
 }
 
@@ -390,12 +508,13 @@ export function logConversationTurn(
   role: 'user' | 'assistant',
   content: string,
   sessionId?: string,
+  source: MemorySource = 'telegram',
 ): void {
   const now = Math.floor(Date.now() / 1000);
   db.prepare(
-    `INSERT INTO conversation_log (chat_id, session_id, role, content, created_at)
-     VALUES (?, ?, ?, ?, ?)`,
-  ).run(chatId, sessionId ?? null, role, content, now);
+    `INSERT INTO conversation_log (chat_id, session_id, role, content, source, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(chatId, sessionId ?? null, role, content, source, now);
 }
 
 export function getRecentConversation(
@@ -414,7 +533,7 @@ export function getRecentConversation(
  * Prune old conversation_log entries, keeping only the most recent N rows per chat.
  * Called alongside memory decay to prevent unbounded disk growth.
  */
-export function pruneConversationLog(keepPerChat = 500): void {
+export function pruneConversationLog(keepPerChat = 500): number {
   // Get distinct chat IDs
   const chats = db
     .prepare('SELECT DISTINCT chat_id FROM conversation_log')
@@ -430,9 +549,12 @@ export function pruneConversationLog(keepPerChat = 500): void {
     )
   `);
 
+  let totalDeleted = 0;
   for (const chat of chats) {
-    deleteStmt.run(chat.chat_id, chat.chat_id, keepPerChat);
+    const result = deleteStmt.run(chat.chat_id, chat.chat_id, keepPerChat);
+    totalDeleted += result.changes;
   }
+  return totalDeleted;
 }
 
 // ── WhatsApp messages ────────────────────────────────────────────────
@@ -731,4 +853,184 @@ export function getSessionTokenUsage(sessionId: string): SessionTokenSummary | n
     firstTurnAt: row.firstTurnAt,
     lastTurnAt: row.lastTurnAt,
   };
+}
+
+/** Returns true if voice mode is enabled for this chat (persisted across restarts). */
+export function getVoiceEnabled(chatId: string): boolean {
+  const row = db.prepare('SELECT voice_enabled FROM sessions WHERE chat_id = ?').get(chatId) as { voice_enabled: number } | undefined;
+  return (row?.voice_enabled ?? 0) === 1;
+}
+
+/** Persist voice mode toggle for a chat. */
+export function setVoiceEnabled(chatId: string, enabled: boolean): void {
+  db.prepare(`
+    INSERT INTO sessions (chat_id, session_id, updated_at, voice_enabled)
+    VALUES (?, '', datetime('now'), ?)
+    ON CONFLICT(chat_id) DO UPDATE SET voice_enabled = excluded.voice_enabled
+  `).run(chatId, enabled ? 1 : 0);
+}
+
+/** Return all chat IDs that have voice mode enabled. */
+export function getVoiceEnabledChats(): string[] {
+  const rows = db.prepare('SELECT chat_id FROM sessions WHERE voice_enabled = 1').all() as { chat_id: string }[];
+  return rows.map(r => r.chat_id);
+}
+
+/**
+ * Log a Thorn sub-agent activity event to the shared agent_activity table.
+ * This feeds the live dashboard in real time.
+ */
+export function logAgentActivity(
+  action: string,
+  type: 'info' | 'success' | 'warning' | 'error' | 'task' = 'info',
+  metadata?: Record<string, unknown>,
+): void {
+  try {
+    db.prepare(`
+      INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, metadata, created_at)
+      VALUES ('thorn', 'Thorn', '🌵', ?, ?, 'executive', ?, datetime('now'))
+    `).run(action, type, metadata ? JSON.stringify(metadata) : null);
+  } catch {
+    // Never crash the bot over a logging failure
+  }
+}
+
+/**
+ * Log a message to the agent_messages team chat table.
+ * Shows up in real time in the Team Chat panel on the dashboard.
+ */
+export function logAgentMessage(opts: {
+  threadId: string;
+  fromAgentId: string;
+  fromAgentName: string;
+  fromAgentEmoji: string;
+  toAgentId?: string;
+  toAgentName?: string;
+  message: string;
+  messageType?: 'message' | 'question' | 'answer' | 'idea' | 'hire';
+}): void {
+  try {
+    db.prepare(`
+      INSERT INTO agent_messages
+        (thread_id, from_agent_id, from_agent_name, from_agent_emoji, to_agent_id, to_agent_name, message, message_type)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      opts.threadId,
+      opts.fromAgentId,
+      opts.fromAgentName,
+      opts.fromAgentEmoji,
+      opts.toAgentId ?? null,
+      opts.toAgentName ?? null,
+      opts.message,
+      opts.messageType ?? 'message',
+    );
+  } catch {
+    // Never crash the bot over a logging failure
+  }
+}
+
+/**
+ * Update an agent's status and current_task in the agents table.
+ */
+export function setAgentStatus(agentId: string, status: 'active' | 'idle' | 'working', currentTask?: string | null): void {
+  try {
+    db.prepare(`
+      UPDATE agents SET status = ?, current_task = ?, updated_at = unixepoch()
+      WHERE id = ?
+    `).run(status, currentTask ?? null, agentId);
+  } catch {
+    // Never crash the bot over a status update failure
+  }
+}
+
+// ── Brain Vault ───────────────────────────────────────────────────────
+
+export interface BrainVaultDoc {
+  id: number;
+  title: string;
+  content: string;
+  type: string;
+  agent_id: string | null;
+  agent_name: string | null;
+  department: string | null;
+  tags: string | null;
+  folder_path: string;
+  starred: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Fetch Brain Vault documents for natural language querying.
+ * Returns the most recent N docs ordered by starred first, then recency.
+ */
+export function getBrainVaultDocs(limit = 40): BrainVaultDoc[] {
+  try {
+    return db
+      .prepare(
+        `SELECT id, title, content, type, agent_id, agent_name, department, tags, folder_path, starred, created_at, updated_at
+         FROM brain_vault
+         ORDER BY starred DESC, created_at DESC
+         LIMIT ?`,
+      )
+      .all(limit) as BrainVaultDoc[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Full-text search on Brain Vault using FTS5.
+ * Sanitises the query and falls back to recency-sorted results if FTS fails.
+ */
+export function searchBrainVaultDocs(query: string, limit = 20): BrainVaultDoc[] {
+  try {
+    // Sanitise: strip FTS special chars, add * for prefix matching on last token
+    const sanitised = query
+      .replace(/['"()^*:-]/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .join(' ');
+    if (!sanitised) return getBrainVaultDocs(limit);
+
+    const ftsQuery = sanitised
+      .split(/\s+/)
+      .map((t) => `"${t}"*`)
+      .join(' ');
+
+    return db
+      .prepare(
+        `SELECT bv.id, bv.title, bv.content, bv.type, bv.agent_id, bv.agent_name, bv.department,
+                bv.tags, bv.folder_path, bv.starred, bv.created_at, bv.updated_at
+         FROM brain_vault bv
+         JOIN brain_vault_fts fts ON bv.id = fts.rowid
+         WHERE brain_vault_fts MATCH ?
+         ORDER BY bv.starred DESC, rank
+         LIMIT ?`,
+      )
+      .all(ftsQuery, limit) as BrainVaultDoc[];
+  } catch {
+    return getBrainVaultDocs(limit);
+  }
+}
+
+/**
+ * Save a new document to the Brain Vault (from Telegram or agents).
+ */
+export function saveBrainVaultDoc(
+  title: string,
+  content: string,
+  folderPath = 'Varios',
+  agentId?: string,
+  agentName?: string,
+  tags?: string,
+): number {
+  const result = db
+    .prepare(
+      `INSERT INTO brain_vault (title, content, folder_path, agent_id, agent_name, tags)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .run(title, content, folderPath, agentId ?? null, agentName ?? null, tags ?? null);
+  return result.lastInsertRowid as number;
 }

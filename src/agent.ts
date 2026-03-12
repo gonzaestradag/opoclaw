@@ -1,8 +1,16 @@
+import fs from 'fs';
+
+import Database from 'better-sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import { PROJECT_ROOT } from './config.js';
 import { readEnvFile } from './env.js';
 import { logger } from './logger.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DB_PATH = path.join(__dirname, '..', 'store', 'claudeclaw.db');
 
 export interface UsageInfo {
   inputTokens: number;
@@ -59,6 +67,19 @@ async function* singleTurn(text: string): AsyncGenerator<{
   };
 }
 
+function logTimeoutToDb(): void {
+  try {
+    const db = new Database(DB_PATH);
+    db.prepare(`
+      INSERT INTO agent_activity (agent_id, agent_name, agent_emoji, action, type, department, created_at)
+      VALUES ('thorn', 'Thorn', '🌵', 'Agent execution timed out', 'error', 'executive', datetime('now'))
+    `).run();
+    db.close();
+  } catch (err) {
+    logger.error({ err }, 'Failed to log timeout to agent_activity');
+  }
+}
+
 /**
  * Run a single user message through Claude Code and return the result.
  *
@@ -87,6 +108,9 @@ export async function runAgent(
   const secrets = readEnvFile(['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY']);
 
   const sdkEnv: Record<string, string | undefined> = { ...process.env };
+  // Remove Claude Code env vars so the subprocess doesn't think it's nested inside another session
+  delete sdkEnv['CLAUDECODE'];
+  delete sdkEnv['CLAUDE_CODE_ENTRYPOINT'];
   if (secrets.CLAUDE_CODE_OAUTH_TOKEN) {
     sdkEnv.CLAUDE_CODE_OAUTH_TOKEN = secrets.CLAUDE_CODE_OAUTH_TOKEN;
   }
@@ -106,7 +130,14 @@ export async function runAgent(
   // Telegram's "typing..." action expires after ~5s.
   const typingInterval = setInterval(onTyping, 4000);
 
-  try {
+  // 20-minute hard timeout — rejects if the agent hangs.
+  // Raised from 10 min: complex delegations (multi-agent orchestration, voice + research)
+  // were routinely hitting the old limit and forcing 3 retries before failing.
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Agent timeout after 20 minutes')), 20 * 60 * 1000),
+  );
+
+  const actualExecution = async (): Promise<void> => {
     logger.info(
       { sessionId: sessionId ?? 'new', messageLen: message.length },
       'Starting agent query',
@@ -212,11 +243,76 @@ export async function runAgent(
           { hasResult: !!resultText, subtype: ev['subtype'] },
           'Agent result received',
         );
+        // Break immediately — don't wait for any trailing events the SDK
+        // might yield after the result. Without this, the function hangs
+        // until the 5-minute timeout fires even though we already have the answer.
+        break;
       }
     }
-  } finally {
-    clearInterval(typingInterval);
+  };
+
+  // Errors from the claude CLI subprocess that are transient and safe to retry
+  const RETRYABLE = ['exited with code 1', 'ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'spawn', 'EPIPE'];
+  const RETRY_DELAYS_MS = [2000, 5000, 10000];
+  const MAX_API_RETRIES = 3;
+
+  // Path to the tg-notify sentinel file for the current chat (if available via env).
+  // Used to detect whether tg-notify.sh fired during this agent run so we can suppress
+  // retries that would cause duplicate Telegram messages.
+  const allowedChatId = process.env['ALLOWED_CHAT_ID'] ?? '';
+  const tgNotifyFlagPath = allowedChatId ? `/tmp/opoclaw_tg_notify_sent_${allowedChatId}` : null;
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= MAX_API_RETRIES; attempt++) {
+    // Reset mutable state so each attempt starts clean
+    newSessionId = undefined;
+    resultText = null;
+    lastCallCacheRead = 0;
+    lastCallInputTokens = 0;
+    didCompact = false;
+    preCompactTokens = null;
+
+    try {
+      // Reuse the same timeout across retries — total wall time stays bounded at 10 min
+      await Promise.race([actualExecution(), timeout]);
+      break; // success — exit retry loop
+    } catch (err) {
+      lastErr = err;
+      const msg = String(err);
+      const isTimeout = msg.includes('timeout') || msg.includes('timed out');
+      const isRetryable = !isTimeout && RETRYABLE.some(e => msg.includes(e));
+
+      if (isRetryable && attempt < MAX_API_RETRIES) {
+        // Before retrying, check if tg-notify.sh was already called during this attempt.
+        // If it was, the agent already sent a message to Telegram. Retrying would cause
+        // it to send again — producing duplicates. In this case, abort the retry loop and
+        // return whatever resultText we have (likely null, meaning bot.ts will suppress output).
+        if (tgNotifyFlagPath) {
+          try {
+            fs.accessSync(tgNotifyFlagPath);
+            // Flag exists — tg-notify was called. Don't retry; let bot.ts suppress the output.
+            logger.warn({ attempt: attempt + 1 }, 'Agent failed but tg-notify.sh was already called — skipping retry to prevent duplicate Telegram messages');
+            break;
+          } catch {
+            // Flag not present — safe to retry
+          }
+        }
+
+        const delay = RETRY_DELAYS_MS[attempt] ?? 10000;
+        logger.warn({ attempt: attempt + 1, maxRetries: MAX_API_RETRIES, err: msg }, `Agent call failed (retryable), retrying in ${delay}ms`);
+        await new Promise<void>(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      clearInterval(typingInterval);
+      if (isTimeout) {
+        logger.error('Agent execution timed out after 20 minutes');
+        logTimeoutToDb();
+      }
+      throw err;
+    }
   }
 
+  clearInterval(typingInterval);
   return { text: resultText, newSessionId, usage };
 }

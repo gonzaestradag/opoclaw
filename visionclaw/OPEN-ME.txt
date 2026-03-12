@@ -1,0 +1,63 @@
+VisionClaw — What You Need to Do in Xcode
+==========================================
+
+Everything has been set up programmatically. You just need to do these 4 steps:
+
+
+STEP 1 — Open the project
+--------------------------
+In Xcode: File > Open
+Navigate to this folder (VisionClaw on your Desktop)
+Open the file: CameraAccess.xcodeproj
+
+
+STEP 2 — Set your Apple ID for signing
+---------------------------------------
+1. In Xcode, click "CameraAccess" at the top of the left sidebar (the blue project icon)
+2. In the middle panel, click the "CameraAccess" target (not the Tests one)
+3. Click the "Signing & Capabilities" tab
+4. Under "Team", open the dropdown and add your Apple ID if it is not there
+   (You may need to click "Add an Account..." and sign in)
+5. Xcode will automatically provision the app for your device
+
+
+STEP 3 — Connect your iPhone
+------------------------------
+1. Plug your iPhone into the Mac with a USB cable
+2. At the top center of Xcode, click the device selector (may say "Any iOS Device" or a simulator name)
+3. Select your iPhone from the list
+4. If your iPhone asks "Trust This Computer?" — tap Trust
+
+
+STEP 4 — Hit Run
+-----------------
+Press the Play button (triangle) in the top left, or press Cmd+R.
+
+The first time it runs, your iPhone may show "Untrusted Developer".
+If that happens: iPhone Settings > General > VPN & Device Management > tap your Apple ID > tap Trust.
+Then press Run again in Xcode.
+
+
+What is already done (no action needed)
+-----------------------------------------
+- Gemini API key is set
+- OpoClaw gateway is configured (host, port, token)
+- System prompt is set to Thorn's personality
+- Bundle ID is set to com.opoclaw.visionclaw
+- All app permissions (camera, microphone, local network) are configured
+
+
+If you are away from home WiFi
+--------------------------------
+The app is configured to reach your Mac Mini at Opos-Mac-mini.local on your home network.
+When away, update the Host field in the app settings to:
+  https://keisha-inescapable-clavately.ngrok-free.dev
+  Port: 443
+
+
+Quick test once the app is running
+------------------------------------
+1. Tap the iPhone mode button on the home screen (to test without glasses)
+2. Tap the microphone
+3. Say "What time is it?" -- Gemini should respond by voice
+4. Say "Send a Telegram message to myself saying VisionClaw is working" -- Thorn should execute it
