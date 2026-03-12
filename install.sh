@@ -628,6 +628,20 @@ else
   warn "CLAUDE.md not found — agent names not applied"
 fi
 
+# Set up workspace from template
+if [ ! -d "${REPO_DIR}/workspace" ]; then
+  if [ -d "${REPO_DIR}/workspace-template" ]; then
+    cp -r "${REPO_DIR}/workspace-template" "${REPO_DIR}/workspace"
+    find "${REPO_DIR}/workspace" -name ".gitkeep" -delete
+    ok "Workspace created at ${REPO_DIR}/workspace/"
+  else
+    mkdir -p "${REPO_DIR}/workspace/brain/Trading" "${REPO_DIR}/workspace/brain/Negocio" \
+             "${REPO_DIR}/workspace/brain/Finanzas" "${REPO_DIR}/workspace/brain/Documentos" \
+             "${REPO_DIR}/workspace/uploads" "${REPO_DIR}/workspace/reports"
+    ok "Workspace folders created"
+  fi
+fi
+
 # ============================================================
 # STEP 14 — Database setup
 # ============================================================

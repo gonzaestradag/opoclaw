@@ -6,7 +6,7 @@
 set -e
 
 REPO="/Users/opoclaw1/claudeclaw"
-BRANCH="feature/onboarding-v2"
+BRANCH="main"
 LOG="/tmp/nightly-git-push.log"
 
 cd "$REPO"
