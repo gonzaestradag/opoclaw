@@ -19,44 +19,141 @@
    If they say no, go back to step 1.
    All following steps must be in the confirmed language.
 
-3. Say (in their language): "Great, let's get you set up — this takes about 10 minutes." / "Perfecto, vamos a configurar todo — tarda unos 10 minutos."
+3. Say (in their language): "Perfect, let's set everything up — about 15 minutes. Ask me anything if you get stuck." / "Perfecto, vamos a configurar todo paso a paso — unos 15 minutos. Si te atoras en algo, pregúntame."
 4. Run `npm install` and show progress. If it fails, diagnose, fix, and retry before continuing.
 5. Run `npm run build`. If it fails, diagnose and fix.
-6. Ask for each key ONE AT A TIME — never dump a list. Wait for the answer before asking the next one. Follow this exact order:
 
-   REQUIRED (ask these always):
+6. Ask for each item ONE AT A TIME. Never show a list. Wait for the answer, confirm it was received, then move to the next one. Use this exact order:
+
+   ── SECTION 1: TELEGRAM ──────────────────────────────────────────
+
    a. Telegram bot token
-      → EN: "Go to Telegram, search @BotFather, send /newbot, follow the steps and paste the token here."
-      → ES: "Abre Telegram, busca @BotFather, manda /newbot, sigue los pasos y pega el token aquí."
-   b. Telegram chat ID
-      → EN: "Now start your bot (search it in Telegram and send any message). I'll detect your chat ID automatically from the first message — or you can paste it here if you already know it."
-      → ES: "Ahora abre tu bot en Telegram y mándale cualquier mensaje. Detecto tu chat ID automáticamente del primer mensaje — o pégalo aquí si ya lo tienes."
-   c. Groq API key (for voice transcription — free)
-      → EN: "Go to console.groq.com, sign up free, create an API key and paste it here."
-      → ES: "Ve a console.groq.com, regístrate gratis, crea una API key y pégala aquí."
-   d. ElevenLabs API key
-      → EN: "Go to elevenlabs.io, sign up, go to Profile → API Key and paste it here."
-      → ES: "Ve a elevenlabs.io, regístrate, ve a Perfil → API Key y pégala aquí."
-   e. ElevenLabs Voice ID
-      → EN: "In ElevenLabs, go to Voices, click your voice, copy the Voice ID and paste it here."
-      → ES: "En ElevenLabs, ve a Voices, haz clic en tu voz, copia el Voice ID y pégalo aquí."
-   f. OpenAI API key (for agent avatars and image generation)
-      → EN: "Go to platform.openai.com → API Keys, create a key and paste it here."
-      → ES: "Ve a platform.openai.com → API Keys, crea una key y pégala aquí."
-   g. Google API key (for Gemini / video analysis)
-      → EN: "Go to aistudio.google.com, click 'Get API key' and paste it here."
-      → ES: "Ve a aistudio.google.com, haz clic en 'Get API key' y pégala aquí."
+      → EN: "First, create your Telegram bot. Open Telegram, search for @BotFather and start a chat. Send /newbot — it will ask for a name (e.g. 'My Assistant') and a username ending in 'bot' (e.g. 'myassistant_bot'). Once done, BotFather gives you a token that looks like 1234567890:AAFxxxxxxx. Paste it here."
+      → ES: "Primero crea tu bot de Telegram. Abre Telegram, busca @BotFather e inicia un chat. Manda /newbot — te va a pedir un nombre (ej. 'Mi Asistente') y un username que termine en 'bot' (ej. 'miasistente_bot'). Al terminar, BotFather te da un token que se ve así: 1234567890:AAFxxxxxxx. Pégalo aquí."
 
-   OPTIONAL — ask these only after all required keys, one at a time:
-   h. Cloudflare Tunnel token (to access your dashboard from outside your home network)
-   i. Vapi API key + Assistant ID (for AI phone calls)
-   j. Binance API key + Secret (for crypto trading bots)
+   b. Disable bot privacy mode (IMPORTANT)
+      → EN: "Now go back to @BotFather, send /mybots, select your bot, then Bot Settings → Group Privacy → Turn Off. This lets the bot read messages in groups if needed. Done? (yes/no)"
+      → ES: "Ahora vuelve a @BotFather, manda /mybots, selecciona tu bot, luego Bot Settings → Group Privacy → Turn Off. Esto permite que el bot lea mensajes en grupos si lo necesitas. ¿Listo? (sí/no)"
 
-   DO NOT ask about: OpenRouter, Moonshot, WhatsApp bridge. These are disabled.
+   c. Telegram chat ID
+      → EN: "Now open Telegram, find your new bot and send it any message (like 'hello'). Then come back here and paste your chat ID. If you don't know it: search @userinfobot on Telegram and send /start — it will tell you your ID."
+      → ES: "Ahora abre Telegram, busca tu bot nuevo y mándale cualquier mensaje (como 'hola'). Luego vuelve aquí y pega tu chat ID. Si no lo sabes: busca @userinfobot en Telegram y manda /start — te dice tu ID."
 
-7. Write the `.env` file with all collected values. Never ask the user to edit it manually.
-8. Start with PM2: `pm2 start dist/index.js --name opoclaw && pm2 save && pm2 startup`
-9. Tell them (in their language): "Done. Send a message to your Telegram bot to test it. If it replies, you're live."
+   ── SECTION 2: VOICE ─────────────────────────────────────────────
+
+   d. Groq API key (free — voice transcription)
+      → EN: "For voice messages: go to console.groq.com, sign up for free (no credit card), go to API Keys → Create API Key. Paste it here. This is completely free."
+      → ES: "Para mensajes de voz: ve a console.groq.com, regístrate gratis (sin tarjeta), ve a API Keys → Create API Key. Pégala aquí. Es completamente gratis."
+
+   e. ElevenLabs API key (voice responses)
+      → EN: "For voice responses in your own cloned voice: go to elevenlabs.io, create an account. Then go to your Profile (top right) → API Key → Copy. Paste it here. The free plan works."
+      → ES: "Para que el bot responda con tu voz clonada: ve a elevenlabs.io, crea una cuenta. Luego ve a tu Perfil (arriba derecha) → API Key → Copiar. Pégala aquí. El plan gratis funciona."
+
+   f. ElevenLabs Voice ID
+      → EN: "Now in ElevenLabs: go to Voices (left sidebar) → My Voices. If you haven't cloned your voice yet, click Add Voice → Voice Clone and follow their steps. Once you have a voice, click on it and copy the Voice ID shown below the name. Paste it here."
+      → ES: "Ahora en ElevenLabs: ve a Voices (sidebar izquierdo) → My Voices. Si aún no clonaste tu voz, haz clic en Add Voice → Voice Clone y sigue sus pasos. Una vez que tengas una voz, haz clic en ella y copia el Voice ID que aparece debajo del nombre. Pégalo aquí."
+
+   ── SECTION 3: AI MODELS ─────────────────────────────────────────
+
+   g. OpenAI API key (agent avatars + image generation)
+      → EN: "Go to platform.openai.com. Sign up or log in. Go to API Keys (left menu) → Create new secret key. Copy it immediately — you won't see it again. Paste it here."
+      → ES: "Ve a platform.openai.com. Regístrate o inicia sesión. Ve a API Keys (menú izquierdo) → Create new secret key. Cópiala inmediatamente — no la vas a volver a ver. Pégala aquí."
+
+   h. Google API key (Gemini — for agents and video analysis)
+      → EN: "Go to aistudio.google.com. Sign in with your Google account. Click 'Get API key' → Create API key in new project. Copy it and paste it here."
+      → ES: "Ve a aistudio.google.com. Inicia sesión con tu cuenta Google. Haz clic en 'Get API key' → Create API key in new project. Cópiala y pégala aquí."
+
+   ── SECTION 4: GOOGLE OAUTH (Calendar + Gmail) ───────────────────
+
+   i. Ask: "Do you want to connect Google Calendar and Gmail? This lets your assistant schedule meetings, check your calendar, and read/send emails. It takes about 5 extra minutes." / "¿Quieres conectar Google Calendar y Gmail? Esto le permite a tu asistente agendar reuniones, revisar tu calendario y leer/enviar correos. Son unos 5 minutos extra."
+
+   If yes, walk through this step by step:
+
+   STEP A — Create a Google Cloud project:
+      → EN: "Go to console.cloud.google.com. Sign in. Click 'Select a project' at the top → New Project. Name it 'OpoClaw' and click Create. Wait for it to finish."
+      → ES: "Ve a console.cloud.google.com. Inicia sesión. Haz clic en 'Select a project' arriba → New Project. Nómbralo 'OpoClaw' y haz clic en Create. Espera a que termine."
+
+   STEP B — Enable APIs:
+      → EN: "Now go to APIs & Services → Library. Search for 'Google Calendar API' and click Enable. Then search for 'Gmail API' and enable that too."
+      → ES: "Ahora ve a APIs & Services → Library. Busca 'Google Calendar API' y haz clic en Enable. Luego busca 'Gmail API' y habilítala también."
+
+   STEP C — Configure OAuth consent screen:
+      → EN: "Go to APIs & Services → OAuth consent screen. Select 'External' and click Create. Fill in: App name = OpoClaw, User support email = your email, Developer contact = your email. Click Save and Continue on each screen until done. Then go to Test users → Add Users → add your Gmail address."
+      → ES: "Ve a APIs & Services → OAuth consent screen. Selecciona 'External' y haz clic en Create. Llena: App name = OpoClaw, User support email = tu correo, Developer contact = tu correo. Haz clic en Save and Continue en cada pantalla hasta terminar. Luego ve a Test users → Add Users → agrega tu dirección de Gmail."
+
+   STEP D — Create credentials:
+      → EN: "Go to APIs & Services → Credentials → Create Credentials → OAuth client ID. Select 'Desktop app' as the application type. Name it 'OpoClaw Desktop'. Click Create. Download the JSON file it gives you."
+      → ES: "Ve a APIs & Services → Credentials → Create Credentials → OAuth client ID. Selecciona 'Desktop app' como tipo de aplicación. Nómbralo 'OpoClaw Desktop'. Haz clic en Create. Descarga el archivo JSON que te da."
+
+   STEP E — Place credentials file:
+      After they download it, run: `mkdir -p ~/.config/gmail && cp ~/Downloads/client_secret_*.json ~/.config/gmail/credentials.json`
+      Tell them: "The credentials file is in place. Now I'll run the authorization flow — a browser window will open asking you to sign in with Google and grant permissions. Click Allow on everything." / "El archivo de credenciales está listo. Ahora corro el flujo de autorización — se va a abrir una ventana del navegador pidiéndote que inicies sesión con Google y otorgues permisos. Haz clic en Allow en todo."
+
+   STEP F — Run OAuth flow:
+      Run: `node dist/scripts/google-auth.js` (or equivalent auth script in the project)
+      If the script doesn't exist, run: `npx tsx scripts/google-auth.ts`
+      Wait for them to confirm the browser opened and they clicked Allow.
+      Confirm the token was saved to `~/.config/gmail/token.json`
+
+   ── SECTION 5: OPTIONAL INTEGRATIONS ────────────────────────────
+
+   Ask all of these as yes/no first, then collect keys only for what they want:
+
+   j. Cloudflare Tunnel (access dashboard from anywhere, not just home network)
+      → EN: "Do you want to access your OpoClaw dashboard from anywhere — not just at home? This uses Cloudflare Tunnel, which is free. (yes/no)"
+      → ES: "¿Quieres acceder a tu dashboard de OpoClaw desde cualquier lugar, no solo en casa? Esto usa Cloudflare Tunnel, que es gratis. (sí/no)"
+      If yes:
+      → EN: "Go to dash.cloudflare.com. Sign up free. Go to Zero Trust → Access → Tunnels → Create a tunnel. Name it 'opoclaw'. Under 'Install connector', copy the token (a long string starting with 'eyJ...'). Paste it here."
+      → ES: "Ve a dash.cloudflare.com. Regístrate gratis. Ve a Zero Trust → Access → Tunnels → Create a tunnel. Nómbralo 'opoclaw'. En 'Install connector', copia el token (una cadena larga que empieza con 'eyJ...'). Pégalo aquí."
+
+   k. Vapi (AI phone calls — your assistant can make and receive calls)
+      → EN: "Do you want your assistant to make AI phone calls? (yes/no)"
+      → ES: "¿Quieres que tu asistente pueda hacer llamadas telefónicas con IA? (sí/no)"
+      If yes: collect VAPI_API_KEY and VAPI_ASSISTANT_ID from vapi.ai
+
+   l. Binance (crypto trading bots — Cruz, Satoshi, Nakamoto)
+      → EN: "Do you want to enable the crypto trading bots? These run 24/7 on Binance. (yes/no)"
+      → ES: "¿Quieres habilitar los bots de trading de cripto? Corren 24/7 en Binance. (sí/no)"
+      If yes:
+      → EN: "Go to binance.com → Profile → API Management → Create API. Name it 'OpoClaw'. IMPORTANT: under IP restriction, add your current public IP address (go to whatismyip.com to find it). Enable 'Enable Trading' permission. Copy the API Key and Secret Key and paste them here."
+      → ES: "Ve a binance.com → Perfil → API Management → Create API. Nómbrala 'OpoClaw'. IMPORTANTE: en IP restriction, agrega tu IP pública actual (ve a whatismyip.com para verla). Habilita el permiso 'Enable Trading'. Copia la API Key y la Secret Key y pégalas aquí."
+      → Also warn: "Note: if your home IP changes (it can), Binance will reject the connection. If the trading bot stops working, update the IP in Binance API Management." / "Nota: si tu IP de casa cambia (puede pasar), Binance va a rechazar la conexión. Si el bot de trading deja de funcionar, actualiza la IP en Binance API Management."
+
+   DO NOT ask about: OpenRouter, Moonshot, WhatsApp bridge.
+
+7. Write the complete `.env` file with all collected values. Never ask the user to edit it manually.
+8. Run: `npm run build` (if not already done)
+9. Start with PM2: `pm2 start dist/index.js --name opoclaw && pm2 save && pm2 startup`
+
+── SECTION 6: FINAL TESTING ─────────────────────────────────────
+
+10. Run through each test one at a time. Ask them to confirm each one before moving to the next:
+
+   TEST 1 — Bot responds:
+   → EN: "Send any message to your Telegram bot now. Does it reply?"
+   → ES: "Mándale cualquier mensaje a tu bot de Telegram ahora. ¿Responde?"
+
+   TEST 2 — Voice (if ElevenLabs configured):
+   → EN: "Send a voice message to your bot. Does it respond with audio?"
+   → ES: "Mándale un mensaje de voz a tu bot. ¿Responde con audio?"
+
+   TEST 3 — Dashboard:
+   → EN: "Open your browser and go to http://localhost:3001 — do you see the OpoClaw dashboard?"
+   → ES: "Abre tu navegador y ve a http://localhost:3001 — ¿ves el dashboard de OpoClaw?"
+
+   TEST 4 — Google Calendar (if configured):
+   → EN: "Ask your bot: 'what's on my calendar today?' — does it show your events?"
+   → ES: "Pregúntale a tu bot: '¿qué tengo en mi calendario hoy?' — ¿muestra tus eventos?"
+
+   For any test that fails: diagnose and fix before moving on. Do not leave a broken component.
+
+11. When all tests pass, say:
+   → EN: "Everything is live. Your OpoClaw is running 24/7. You can close this terminal — PM2 keeps it running in the background. Welcome."
+   → ES: "Todo está activo. Tu OpoClaw corre 24/7. Puedes cerrar esta terminal — PM2 lo mantiene corriendo en segundo plano. Bienvenido."
+
+RULE: The user can ask questions at any point during setup. Answer them, then continue where you left off.
+RULE: Never leave a step incomplete. If something fails, fix it before moving forward.
+RULE: Never ask the user to manually edit any file.
 
 Do not read the rest of this file until the install is complete.
 
