@@ -1,4 +1,4 @@
-# ClaudeClaw
+# OpoClaw
 
 ```
  ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗
@@ -66,9 +66,9 @@ git config --global user.email "you@example.com"
 ```
 Without this, git operations will fail with a confusing error about missing identity.
 
-**macOS users:** After starting ClaudeClaw for the first time, your Mac may show "Node wants to access..." permission dialogs. You need to click Allow on each one or the bot will silently hang. Keep an eye on your Mac screen during the first run.
+**macOS users:** After starting OpoClaw for the first time, your Mac may show "Node wants to access..." permission dialogs. You need to click Allow on each one or the bot will silently hang. Keep an eye on your Mac screen during the first run.
 
-**Which Claude plan works best?** ClaudeClaw runs the `claude` CLI, so any plan works (Free, Pro, Max). However, complex multi-step tasks (building skills, debugging code, multi-agent work) perform significantly better on **Opus**. If you're on the Free or Pro plan and Claude struggles with a task, the model matters. Sonnet is fast but often can't handle the kind of agentic work ClaudeClaw enables. Max ($100 or $200) with Opus is the recommended experience.
+**Which Claude plan works best?** OpoClaw runs the `claude` CLI, so any plan works (Free, Pro, Max). However, complex multi-step tasks (building skills, debugging code, multi-agent work) perform significantly better on **Opus**. If you're on the Free or Pro plan and Claude struggles with a task, the model matters. Sonnet is fast but often can't handle the kind of agentic work OpoClaw enables. Max ($100 or $200) with Opus is the recommended experience.
 
 **New to the terminal?** Download [Warp](https://www.warp.dev) — it's a modern terminal with AI built in. If you hit any OS-level issues during setup (permissions, missing tools, PATH problems), type `/agent` in Warp and describe what went wrong. It will walk you through fixing it. This alone will save you hours of Googling.
 
@@ -78,7 +78,7 @@ That's it for hard requirements. Everything else (voice, video, WhatsApp) is opt
 
 ### Step 2 — Create a Telegram bot
 
-You need a bot token from Telegram. This is what ClaudeClaw uses to send and receive messages.
+You need a bot token from Telegram. This is what OpoClaw uses to send and receive messages.
 
 1. Open Telegram and search for **@BotFather**
 2. Send `/newbot`
@@ -92,8 +92,8 @@ Keep this token handy for the next step.
 ### Step 3 — Clone and install
 
 ```bash
-git clone https://github.com/earlyaidopters/claudeclaw.git
-cd claudeclaw
+git clone https://github.com/earlyaidopters/opoclaw.git
+cd opoclaw
 npm install
 ```
 
@@ -117,7 +117,7 @@ The wizard walks you through everything interactively:
 
 > **Prefer to let Claude handle it?** After cloning, `cd` into the repo, run `claude`, and paste:
 > ```
-> I just cloned ClaudeClaw. Please read README.md and set me up completely —
+> I just cloned OpoClaw. Please read README.md and set me up completely —
 > install deps, configure .env, help me get any API keys I need, and set up
 > the background service for my OS.
 > ```
@@ -162,25 +162,25 @@ or just start talking. Claude Code is running on your machine — it has access 
 
 ### Step 7 — Run as a background service
 
-You probably want ClaudeClaw running automatically, not manually in a terminal.
+You probably want OpoClaw running automatically, not manually in a terminal.
 
 **macOS** — the setup wizard installs a launchd agent. Or manually:
 ```bash
 # After running npm run setup, it's already installed.
 # Logs:
-tail -f /tmp/claudeclaw.log
+tail -f /tmp/opoclaw.log
 ```
 
 **Linux** — the setup wizard installs a systemd user service:
 ```bash
-systemctl --user status claudeclaw
-journalctl --user -u claudeclaw -f
+systemctl --user status opoclaw
+journalctl --user -u opoclaw -f
 ```
 
 **Windows** — use WSL2 (recommended) and follow the Linux steps, or:
 ```bash
 npm install -g pm2
-pm2 start dist/index.js --name claudeclaw
+pm2 start dist/index.js --name opoclaw
 pm2 save && pm2 startup
 ```
 
@@ -208,12 +208,12 @@ Output looks like:
 
 ---
 
-## Updating ClaudeClaw
+## Updating OpoClaw
 
 When a new version is released, update in 4 commands:
 
 ```bash
-cd claudeclaw          # go to your ClaudeClaw directory
+cd opoclaw          # go to your OpoClaw directory
 git pull               # pull the latest code
 npm install            # install any new dependencies
 npm run build          # recompile TypeScript
@@ -229,7 +229,7 @@ Then restart the bot (Ctrl+C and `npm start`, or restart the background service)
 
 ## How it works
 
-![ClaudeClaw architecture](assets/architecture.jpeg)
+![OpoClaw architecture](assets/architecture.jpeg)
 
 ## What's included
 
@@ -369,7 +369,7 @@ Any file Claude Code can open: PDFs, code, markdown, CSV, plain text. Caption is
 
 ### Videos → Gemini analysis
 
-ClaudeClaw downloads the video to `workspace/uploads/` and tells Claude to analyze it with the `gemini-api-dev` skill. Without `GOOGLE_API_KEY`, Claude receives the file path but can't understand the content. Telegram caps downloads at 20MB.
+OpoClaw downloads the video to `workspace/uploads/` and tells Claude to analyze it with the `gemini-api-dev` skill. Without `GOOGLE_API_KEY`, Claude receives the file path but can't understand the content. Telegram caps downloads at 20MB.
 
 ### File sending → Claude sends you files
 
@@ -446,7 +446,7 @@ A live web page that shows you everything happening inside your assistant: what 
 
 ![Dashboard architecture](assets/dashboard-architecture.png)
 
-When you start ClaudeClaw, a small web page starts running alongside the bot. It reads directly from the same database the bot uses and shows you the data in real time.
+When you start OpoClaw, a small web page starts running alongside the bot. It reads directly from the same database the bot uses and shows you the data in real time.
 
 Here's what happens when you use it:
 
@@ -483,7 +483,7 @@ It prints a long random string like `a3f8c2d1e5b794...` — this is your dashboa
 
 #### Step 2 — Add the password to your settings
 
-Open the `.env` file in your ClaudeClaw folder. (This is the same file where your Telegram token and other keys live. Open it with any text editor — TextEdit on Mac, Notepad on Windows, or whatever your terminal editor is.)
+Open the `.env` file in your OpoClaw folder. (This is the same file where your Telegram token and other keys live. Open it with any text editor — TextEdit on Mac, Notepad on Windows, or whatever your terminal editor is.)
 
 Add this line:
 
@@ -566,10 +566,10 @@ brew install cloudflare/cloudflare/cloudflared
 cloudflared tunnel login
 
 # 3. Create a tunnel (remember the ID it prints — you'll need it)
-cloudflared tunnel create claudeclaw
+cloudflared tunnel create opoclaw
 
 # 4. Connect your domain to the tunnel (replace with your actual domain)
-cloudflared tunnel route dns claudeclaw dash.yourdomain.com
+cloudflared tunnel route dns opoclaw dash.yourdomain.com
 ```
 
 Now you need to create a config file. Open your terminal and paste:
@@ -594,7 +594,7 @@ Save and exit (in nano: press `Ctrl+X`, then `Y`, then `Enter`).
 
 Start the tunnel:
 ```bash
-cloudflared tunnel run claudeclaw
+cloudflared tunnel run opoclaw
 ```
 
 Update your `.env`:
@@ -611,7 +611,7 @@ To make the tunnel start automatically when your computer boots:
 brew services start cloudflared
 ```
 
-**Moving to a new machine later?** Copy two files from the old machine: `~/.cloudflared/config.yml` and the `.json` credentials file next to it. Run `cloudflared tunnel run claudeclaw` on the new machine. Same URL, no changes needed.
+**Moving to a new machine later?** Copy two files from the old machine: `~/.cloudflared/config.yml` and the `.json` credentials file next to it. Run `cloudflared tunnel run opoclaw` on the new machine. Same URL, no changes needed.
 
 ### Things to know
 
@@ -640,7 +640,7 @@ All endpoints require `?token=YOUR_TOKEN`. Per-user endpoints also need `&chatId
 
 ## Slack (optional)
 
-Requires a Slack User OAuth Token. This connects to your workspace so ClaudeClaw can read and send messages on your behalf.
+Requires a Slack User OAuth Token. This connects to your workspace so OpoClaw can read and send messages on your behalf.
 
 ### Step 1 — Create a Slack app
 
@@ -648,7 +648,7 @@ Requires a Slack User OAuth Token. This connects to your workspace so ClaudeClaw
 2. Click the green **Create New App** button (top right)
 3. In the popup, choose **From scratch** (not "From an app manifest")
 4. Fill in:
-   - **App Name**: anything you want (e.g. `ClaudeClaw`)
+   - **App Name**: anything you want (e.g. `OpoClaw`)
    - **Pick a workspace**: select the Slack workspace you want to connect
 5. Click **Create App**
 
@@ -690,14 +690,14 @@ This is the critical step. You need to add permissions so the app can read and s
 6. You'll now see a **User OAuth Token** field with a token that starts with `xoxp-`
 7. Click **Copy** to copy the token
 
-### Step 4 — Add the token to ClaudeClaw
+### Step 4 — Add the token to OpoClaw
 
-1. Open your `.env` file in the ClaudeClaw project directory
+1. Open your `.env` file in the OpoClaw project directory
 2. Add the token:
    ```
    SLACK_USER_TOKEN=xoxp-your-token-here
    ```
-3. Restart ClaudeClaw
+3. Restart OpoClaw
 
 ### Step 5 — Verify it works
 
@@ -706,11 +706,11 @@ Send `/slack` in your Telegram chat. You should see a numbered list of your rece
 If you get "Slack not connected", double-check:
 - The token starts with `xoxp-` (not `xoxb-` which is a bot token)
 - The `.env` file has no extra spaces around the `=` sign
-- You restarted ClaudeClaw after adding the token
+- You restarted OpoClaw after adding the token
 
 ### Using Slack from Claude Code (skill)
 
-ClaudeClaw ships with a Slack CLI at `dist/slack-cli.js` and a matching skill in `skills/slack/`. To use Slack via natural language from any Claude Code session:
+OpoClaw ships with a Slack CLI at `dist/slack-cli.js` and a matching skill in `skills/slack/`. To use Slack via natural language from any Claude Code session:
 
 ```bash
 cp -r skills/slack ~/.claude/skills/slack
@@ -721,7 +721,7 @@ Then just say "check my slack" or "message Jane on slack saying hey" and Claude 
 ### Slack CLI reference
 
 ```bash
-cd /path/to/claudeclaw
+cd /path/to/opoclaw
 
 node dist/slack-cli.js list              # List conversations with unread counts
 node dist/slack-cli.js list --limit 10   # Limit results
@@ -774,9 +774,9 @@ Messages you send via the bot go into a `wa_outbox` SQLite table. The daemon's o
 
 ## Memory
 
-![ClaudeClaw memory system diagram](assets/memory-diagram.jpeg)
+![OpoClaw memory system diagram](assets/memory-diagram.jpeg)
 
-ClaudeClaw has three layers of context working simultaneously, all automatic, nothing to configure.
+OpoClaw has three layers of context working simultaneously, all automatic, nothing to configure.
 
 ### Layer 1 — Session resumption
 
@@ -902,7 +902,7 @@ node dist/schedule-cli.js delete <id>
 
 ## Database
 
-ClaudeClaw ships with SQLite and **creates everything automatically on first run**. No migrations, no setup, no external database server. File lives at `store/claudeclaw.db`.
+OpoClaw ships with SQLite and **creates everything automatically on first run**. No migrations, no setup, no external database server. File lives at `store/opoclaw.db`.
 
 **Schema:**
 
@@ -921,7 +921,7 @@ conversation_log -- Full conversation turns (used by /respin)
 Inspect it directly:
 
 ```bash
-sqlite3 store/claudeclaw.db
+sqlite3 store/opoclaw.db
 
 SELECT * FROM memories ORDER BY accessed_at DESC LIMIT 10;
 SELECT * FROM scheduled_tasks;
@@ -933,7 +933,7 @@ SELECT * FROM wa_outbox WHERE sent_at IS NULL;
 
 ## Customizing your assistant (CLAUDE.md)
 
-`CLAUDE.md` is loaded into every Claude Code session. It's the personality and context file — the main thing to edit to make ClaudeClaw yours.
+`CLAUDE.md` is loaded into every Claude Code session. It's the personality and context file — the main thing to edit to make OpoClaw yours.
 
 The sections that matter most:
 
@@ -953,7 +953,7 @@ The sections that matter most:
 
 ## Multi-agent team (optional)
 
-ClaudeClaw ships with a full multi-agent system. Instead of one assistant doing everything, you build a company: a CEO assistant that talks to you on Telegram, directors that own departments, and workers that execute tasks autonomously in the background.
+OpoClaw ships with a full multi-agent system. Instead of one assistant doing everything, you build a company: a CEO assistant that talks to you on Telegram, directors that own departments, and workers that execute tasks autonomously in the background.
 
 Everything is visible on the [full web dashboard](docs/DASHBOARD.md).
 
@@ -1017,11 +1017,11 @@ The startup banner is in `banner.txt` at the project root. Replace it with anyth
 
 ## Skills to install
 
-ClaudeClaw auto-loads every skill in `~/.claude/skills/`. Install a skill by copying its folder there.
+OpoClaw auto-loads every skill in `~/.claude/skills/`. Install a skill by copying its folder there.
 
 ### Bundled skills
 
-ClaudeClaw ships with ready-to-use skills in the `skills/` directory. Copy any of these to activate them:
+OpoClaw ships with ready-to-use skills in the `skills/` directory. Copy any of these to activate them:
 
 ```bash
 # Gmail — read, triage, reply, send, create filters
@@ -1091,13 +1091,13 @@ npm run typecheck # Type-check without compiling
 
 ## Is this compliant with Anthropic's Terms of Service?
 
-**Yes.** On February 19, 2026, Anthropic published their [Legal and Compliance page](https://docs.anthropic.com/en/docs/legal-and-compliance) banning OAuth tokens in third-party tools. ClaudeClaw is not affected.
+**Yes.** On February 19, 2026, Anthropic published their [Legal and Compliance page](https://docs.anthropic.com/en/docs/legal-and-compliance) banning OAuth tokens in third-party tools. OpoClaw is not affected.
 
 **What's banned:** Tools that extract your OAuth token and make API calls with it from third-party code — impersonating Claude Code without running it (e.g. the old OpenClaw).
 
-**Why ClaudeClaw is different:** `@anthropic-ai/claude-agent-sdk`'s `query()` spawns the `claude` binary as a child process. That subprocess manages its own OAuth from `~/.claude/`. ClaudeClaw never reads or transmits your token. It runs Claude Code and reads the output — identical to `claude -p "message"` in a terminal.
+**Why OpoClaw is different:** `@anthropic-ai/claude-agent-sdk`'s `query()` spawns the `claude` binary as a child process. That subprocess manages its own OAuth from `~/.claude/`. OpoClaw never reads or transmits your token. It runs Claude Code and reads the output — identical to `claude -p "message"` in a terminal.
 
-| | ClaudeClaw | Token-extraction tools |
+| | OpoClaw | Token-extraction tools |
 |---|---|---|
 | Runs the official `claude` CLI | ✅ | ❌ |
 | OAuth stays in `~/.claude/` | ✅ | ❌ |
@@ -1111,7 +1111,7 @@ For server or multi-user deployments, set `ANTHROPIC_API_KEY` to use pay-per-tok
 
 ## Security notes
 
-ClaudeClaw is designed to run on your personal machine for your own use. A few things to be aware of:
+OpoClaw is designed to run on your personal machine for your own use. A few things to be aware of:
 
 **`bypassPermissions` mode.** The bot runs Claude Code with `permissionMode: 'bypassPermissions'`. This is required because there's no terminal to approve tool-use prompts. It means Claude can execute any tool (shell commands, file reads, web requests) without confirmation. This is safe when the bot is locked to your chat ID on your own machine. Do not expose it to untrusted users.
 
@@ -1127,7 +1127,7 @@ ClaudeClaw is designed to run on your personal machine for your own use. A few t
 
 **Bot doesn't respond**
 - Check `ALLOWED_CHAT_ID` matches the number from `/chatid`
-- Check logs: `tail -f /tmp/claudeclaw.log`
+- Check logs: `tail -f /tmp/opoclaw.log`
 - Run `npm run status` for a full health check
 - Verify Claude auth: `claude --version`
 - **macOS:** Check if your Mac is showing "Node wants to access..." permission dialogs. The bot hangs until you click Allow. This is easy to miss if your Mac screen is off or in the background.
@@ -1136,15 +1136,15 @@ ClaudeClaw is designed to run on your personal machine for your own use. A few t
 - `CLAUDE.md` ships with `[BRACKETED]` placeholder values like `[YOUR NAME]` and `[YOUR ASSISTANT NAME]`
 - These **must** be replaced before the bot can work properly
 - The setup wizard opens `CLAUDE.md` in your editor for this, but if you skip it or your editor doesn't save, edit it manually: open `CLAUDE.md` in any text editor, find/replace all `[BRACKETED]` values with your actual info
-- You do **not** need to fill in every bracket. At minimum: `[YOUR ASSISTANT NAME]`, `[YOUR NAME]`, and `[PATH TO CLAUDECLAW]` (the full path to your claudeclaw directory)
+- You do **not** need to fill in every bracket. At minimum: `[YOUR ASSISTANT NAME]`, `[YOUR NAME]`, and `[PATH TO OPOCLAW]` (the full path to your opoclaw directory)
 
 **Git errors during setup**
 - "Please tell me who you are" — run `git config --global user.name "Your Name"` and `git config --global user.email "you@email.com"`
 - Git needs these set once, globally, before it can do anything
 
 **Can't access the internet / "break out"**
-- ClaudeClaw runs the real Claude Code CLI, which has full internet access through its built-in tools (web search, web fetch, bash with curl, etc.)
-- If Claude says it can't access the internet, it's likely a skill or prompt issue, not a ClaudeClaw limitation
+- OpoClaw runs the real Claude Code CLI, which has full internet access through its built-in tools (web search, web fetch, bash with curl, etc.)
+- If Claude says it can't access the internet, it's likely a skill or prompt issue, not a OpoClaw limitation
 - Make sure your Claude Code CLI works in the terminal first: open a terminal, run `claude`, and ask it to search the web
 
 **Voice notes return an error**
@@ -1161,13 +1161,13 @@ ClaudeClaw is designed to run on your personal machine for your own use. A few t
 - To force re-authentication, delete `store/waweb/` and restart the daemon
 
 **"409 Conflict: terminated by other getUpdates request"**
-- Two instances running. Kill the old one: `kill $(cat store/claudeclaw.pid)`
+- Two instances running. Kill the old one: `kill $(cat store/opoclaw.pid)`
 
 **Session feels off or confused**
 - Send `/newchat` for a fresh start
 
 **File downloads fail**
-- Telegram caps downloads at 20MB — this is a Telegram API limit, not a ClaudeClaw one
+- Telegram caps downloads at 20MB — this is a Telegram API limit, not a OpoClaw one
 
 ---
 
@@ -1177,22 +1177,22 @@ ClaudeClaw is designed to run on your personal machine for your own use. A few t
 No. There is no separate prompt to execute and no `Rebuild_Prompt.md` file. `CLAUDE.md` in the repo **is** the prompt — it loads automatically into every Claude Code session. You personalize it once (replace the `[BRACKETED]` placeholders with your info) and forget about it. Just clone the repo, run setup, and go. When you `git pull` updates, your personalized `.env` stays untouched (gitignored) and `CLAUDE.md` changes are merged by git.
 
 **"Does this use Claude Remote?"**
-No. ClaudeClaw has nothing to do with Anthropic's Remote product. It runs the `claude` CLI locally on your own machine (Mac, Linux, or Windows via WSL2) and pipes results to Telegram. No cloud VMs, no remote sessions.
+No. OpoClaw has nothing to do with Anthropic's Remote product. It runs the `claude` CLI locally on your own machine (Mac, Linux, or Windows via WSL2) and pipes results to Telegram. No cloud VMs, no remote sessions.
 
 **"Does this work on Windows?"**
-Yes, through WSL2. Install WSL2, clone ClaudeClaw inside the WSL filesystem, and follow the normal Linux setup steps. The setup wizard detects Windows and offers WSL2 or PM2 options.
+Yes, through WSL2. Install WSL2, clone OpoClaw inside the WSL filesystem, and follow the normal Linux setup steps. The setup wizard detects Windows and offers WSL2 or PM2 options.
 
 **"What is GOOGLE_API_KEY for?"**
 Video analysis via Google Gemini. It is **not** for Gmail or Google Calendar (those use separate OAuth credentials via the gmail and google-calendar skills). Get it free at [aistudio.google.com](https://aistudio.google.com).
 
 **"Should I watch the Claude Code video first?"**
-Recommended but not required. The video covers how Claude Code works under the hood, which helps you understand what ClaudeClaw is actually doing. But you can set up ClaudeClaw first and watch it later.
+Recommended but not required. The video covers how Claude Code works under the hood, which helps you understand what OpoClaw is actually doing. But you can set up OpoClaw first and watch it later.
 
 **"How do I update when a new version drops?"**
-`cd claudeclaw && git pull && npm install && npm run build` then restart. See [Updating ClaudeClaw](#updating-claudeclaw) above.
+`cd opoclaw && git pull && npm install && npm run build` then restart. See [Updating OpoClaw](#updating-opoclaw) above.
 
 **"Telegram formatting looks broken / not formatting properly"**
-ClaudeClaw converts Claude's Markdown to Telegram-safe HTML (bold, italic, code blocks, links). Telegram's formatting support is limited compared to a full web page. If something looks off, it's usually Telegram's rendering, not a bug. For very long or complex responses, the formatting is intentionally kept simple to avoid Telegram parse errors.
+OpoClaw converts Claude's Markdown to Telegram-safe HTML (bold, italic, code blocks, links). Telegram's formatting support is limited compared to a full web page. If something looks off, it's usually Telegram's rendering, not a bug. For very long or complex responses, the formatting is intentionally kept simple to avoid Telegram parse errors.
 
 **"Can I add extra security like 2FA?"**
 `ALLOWED_CHAT_ID` restricts the bot to your Telegram account, which is the default security layer. Community members have added Google Authenticator (TOTP) for tiered permissions (read-only vs elevated actions with time-limited re-auth). This isn't built in yet, but it's a straightforward addition to `handleMessage()` in `src/bot.ts` if you want that extra layer.
@@ -1226,7 +1226,7 @@ flowchart TD
     Sched["Scheduler\ncron tasks"] -->|every 60s| Agent
     WA["WhatsApp daemon\n:4242"] --> Bot
 
-    DB[("SQLite\nstore/claudeclaw.db")] --- Mem
+    DB[("SQLite\nstore/opoclaw.db")] --- Mem
     DB --- Sched
     DB --- WA
 ```
@@ -1236,7 +1236,7 @@ flowchart TD
 ## Project structure
 
 ```
-claudeclaw/
+opoclaw/
 │
 │  ← Files you'll actually touch
 ├── CLAUDE.md             ← START HERE: your assistant's personality and context
@@ -1245,7 +1245,7 @@ claudeclaw/
 │
 │  ← Configuration and setup
 ├── .env.example          Template for .env — shows all available variables
-├── claudeclaw.plist      macOS LaunchAgent template (setup wizard uses this)
+├── opoclaw.plist      macOS LaunchAgent template (setup wizard uses this)
 ├── package.json          npm scripts and dependencies
 ├── tsconfig.json         TypeScript compiler config
 │
@@ -1300,8 +1300,8 @@ claudeclaw/
 │
 │  ← Runtime data (auto-created, gitignored)
 ├── store/
-│   ├── claudeclaw.db         SQLite database — created automatically on first run
-│   ├── claudeclaw.pid        Tracks the running process to prevent duplicates
+│   ├── opoclaw.db         SQLite database — created automatically on first run
+│   ├── opoclaw.pid        Tracks the running process to prevent duplicates
 │   └── waweb/                WhatsApp session — scan QR once, persists here
 │
 └── workspace/
