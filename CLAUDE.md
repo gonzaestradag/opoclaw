@@ -20,20 +20,43 @@
    All following steps must be in the confirmed language.
 
 3. Say (in their language): "Great, let's get you set up — this takes about 10 minutes." / "Perfecto, vamos a configurar todo — tarda unos 10 minutos."
-4. Run `npm install` (show output so the user can see progress)
-3. If npm install fails, diagnose and fix the error, then retry
-4. Run `npm run build`
-5. Walk the user through creating `.env` by asking for each key one at a time:
-   - Telegram bot token (required — get from @BotFather)
-   - Telegram chat ID (tell them to start the bot and send /start, you'll get it from the first message)
-   - ElevenLabs API key + Voice ID (optional — for voice responses)
-   - Groq API key (optional — for voice transcription, free at console.groq.com)
-   - OpenAI API key (optional — for DALL-E avatars and Whisper)
-   - Any other keys they mention having
-6. Write the `.env` file with all collected values
-7. Run `npm run build` if not done yet
-8. Start with PM2: `pm2 start dist/index.js --name opoclaw && pm2 save`
-9. Tell them: "Done. Send a message to your Telegram bot to test it."
+4. Run `npm install` and show progress. If it fails, diagnose, fix, and retry before continuing.
+5. Run `npm run build`. If it fails, diagnose and fix.
+6. Ask for each key ONE AT A TIME — never dump a list. Wait for the answer before asking the next one. Follow this exact order:
+
+   REQUIRED (ask these always):
+   a. Telegram bot token
+      → EN: "Go to Telegram, search @BotFather, send /newbot, follow the steps and paste the token here."
+      → ES: "Abre Telegram, busca @BotFather, manda /newbot, sigue los pasos y pega el token aquí."
+   b. Telegram chat ID
+      → EN: "Now start your bot (search it in Telegram and send any message). I'll detect your chat ID automatically from the first message — or you can paste it here if you already know it."
+      → ES: "Ahora abre tu bot en Telegram y mándale cualquier mensaje. Detecto tu chat ID automáticamente del primer mensaje — o pégalo aquí si ya lo tienes."
+   c. Groq API key (for voice transcription — free)
+      → EN: "Go to console.groq.com, sign up free, create an API key and paste it here."
+      → ES: "Ve a console.groq.com, regístrate gratis, crea una API key y pégala aquí."
+   d. ElevenLabs API key
+      → EN: "Go to elevenlabs.io, sign up, go to Profile → API Key and paste it here."
+      → ES: "Ve a elevenlabs.io, regístrate, ve a Perfil → API Key y pégala aquí."
+   e. ElevenLabs Voice ID
+      → EN: "In ElevenLabs, go to Voices, click your voice, copy the Voice ID and paste it here."
+      → ES: "En ElevenLabs, ve a Voices, haz clic en tu voz, copia el Voice ID y pégalo aquí."
+   f. OpenAI API key (for agent avatars and image generation)
+      → EN: "Go to platform.openai.com → API Keys, create a key and paste it here."
+      → ES: "Ve a platform.openai.com → API Keys, crea una key y pégala aquí."
+   g. Google API key (for Gemini / video analysis)
+      → EN: "Go to aistudio.google.com, click 'Get API key' and paste it here."
+      → ES: "Ve a aistudio.google.com, haz clic en 'Get API key' y pégala aquí."
+
+   OPTIONAL — ask these only after all required keys, one at a time:
+   h. Cloudflare Tunnel token (to access your dashboard from outside your home network)
+   i. Vapi API key + Assistant ID (for AI phone calls)
+   j. Binance API key + Secret (for crypto trading bots)
+
+   DO NOT ask about: OpenRouter, Moonshot, WhatsApp bridge. These are disabled.
+
+7. Write the `.env` file with all collected values. Never ask the user to edit it manually.
+8. Start with PM2: `pm2 start dist/index.js --name opoclaw && pm2 save && pm2 startup`
+9. Tell them (in their language): "Done. Send a message to your Telegram bot to test it. If it replies, you're live."
 
 Do not read the rest of this file until the install is complete.
 
