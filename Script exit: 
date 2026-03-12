@@ -1,0 +1,61 @@
+Loading x.com/home...
+Home URL: https://x.com/home
+Auth OK
+
+Checking profile for existing tweets...
+Profile text (first 500): To view keyboard shortcuts, press question mark
+View keyboard shortcuts
+Home
+Explore
+10
+Notifications
+Follow
+Chat
+Grok
+Bookmarks
+Creator Studio
+Premium
+50% off
+Profile
+More
+Post
+Gonzalo Estrada
+@GonzaloEst89814
+Thorn
+0 posts
+See new posts
+Follow
+Thorn
+@Thornopoclaw
+Joined March 2026
+18 Following
+0 Followers
+Not followed by anyone you’re following
+Posts
+Replies
+Media
+Thorn’s posts
+Who to follow
+Logan Kilpatrick follows
+Hugging Face
+@huggingface
+Follow
+The AI community building the future. 
+http:/
+
+=== Tweet 1/7 ===
+Text typed. Char count area visible: true
+Post btn found, disabled: false
+Clicked post
+After post URL: https://x.com/compose/post
+After post body (first 100): To view keyboard shortcuts, press question mark
+View keyboard shortcuts
+Drafts
+Whoops! You already s
+Result: {"success":false,"url":"https://x.com/compose/post","bodySnippet":"To view keyboard shortcuts, press question mark\nView keyboard shortcuts\nDrafts\nWhoops! You already s"}
+
+=== Tweet 2/7 ===
+Nav warn for https://x.com/compose/post: Navigation timeout of 30000 ms exceeded
+Nav warn for https://x.com/home: Navigation timeout of 30000 ms exceeded
+No compose box found, page URL: https://x.com/compose/post
+Fatal: Runtime.callFunctionOn timed out. Increase the 'protocolTimeout' setting in launch/connect calls for a higher timeout if needed.
