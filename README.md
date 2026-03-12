@@ -16,17 +16,36 @@
  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝
 ```
 
-> Your Claude Code CLI, delivered to your phone via Telegram.
-
-ClaudeClaw is not a chatbot wrapper. It spawns the actual `claude` CLI on your Mac or Linux machine and pipes the result back to your Telegram chat. Everything that works in your terminal — your skills, your tools, your context — works from your phone.
+> Your personal AI operating system — Claude Code + Telegram + 20 agents + dashboard + trading bots + VisionClaw glasses. Everything on your Mac, controlled from your phone.
 
 ---
 
-## Get started
+## Install in 3 commands
 
-![ClaudeClaw setup flow](assets/setup-flow.jpeg)
+```bash
+git clone https://github.com/gonzaestradag/opoclaw
+cd opoclaw
+bash install.sh
+```
 
-Follow these steps in order. The whole thing takes about 5 minutes.
+The wizard walks you through everything — API keys, agents, dashboard, Cloudflare tunnel, Google OAuth, Vapi, Binance, VisionClaw. Takes about 10 minutes. Zero manual config.
+
+---
+
+## What you get
+
+- **Thorn** — your AI COO, available 24/7 on Telegram (voice + text)
+- **20 AI agents** — engineering, intelligence, ops, finance, strategy, trading, and more
+- **React dashboard** — real-time org tree, virtual office, task board, activity feed
+- **44 skills** — invoice gen, contracts, cold outreach, phone calls, Gmail, Calendar, and more
+- **Cruz Intelligence** — market analysis agent feeding signals to trading bots
+- **Satoshi + Nakamoto** — conservative and aggressive crypto trading bots
+- **VisionClaw** — iOS app connecting your iPhone + Meta Ray-Ban glasses to Thorn
+- **Cloudflare Tunnel** — access your dashboard from anywhere
+
+---
+
+## Get started (manual setup)
 
 ---
 
