@@ -32,36 +32,18 @@ function setEnvVar(key, value) {
 }
 
 async function uploadTalkingPhoto(apiKey, photoPath) {
-  const FormData = (() => {
-    try { return require('form-data'); } catch { return null; }
-  })();
-
+  // HeyGen requires raw binary POST with Content-Type: image/jpeg
   const fileBuffer = fs.readFileSync(photoPath);
-  const filename = path.basename(photoPath);
 
   return new Promise((resolve, reject) => {
-    const boundary = '----FormBoundary' + Math.random().toString(36).slice(2);
-    const CRLF = '\r\n';
-
-    const bodyParts = [
-      `--${boundary}${CRLF}`,
-      `Content-Disposition: form-data; name="file"; filename="${filename}"${CRLF}`,
-      `Content-Type: image/jpeg${CRLF}`,
-      CRLF,
-    ];
-
-    const preamble = Buffer.from(bodyParts.join(''));
-    const epilogue = Buffer.from(`${CRLF}--${boundary}--${CRLF}`);
-    const body = Buffer.concat([preamble, fileBuffer, epilogue]);
-
     const options = {
       hostname: 'upload.heygen.com',
       path: '/v1/talking_photo',
       method: 'POST',
       headers: {
         'X-Api-Key': apiKey,
-        'Content-Type': `multipart/form-data; boundary=${boundary}`,
-        'Content-Length': body.length,
+        'Content-Type': 'image/jpeg',
+        'Content-Length': fileBuffer.length,
       },
     };
 
@@ -79,7 +61,7 @@ async function uploadTalkingPhoto(apiKey, photoPath) {
     });
 
     req.on('error', reject);
-    req.write(body);
+    req.write(fileBuffer);
     req.end();
   });
 }

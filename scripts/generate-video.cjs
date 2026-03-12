@@ -107,28 +107,17 @@ async function generateAudio(text, apiKey, voiceId) {
 async function uploadAudioToHeyGen(audioPath, apiKey) {
   console.log('[2/4] Uploading audio to HeyGen...');
 
+  // HeyGen requires raw binary POST with Content-Type: audio/mpeg
   const fileBuffer = fs.readFileSync(audioPath);
-  const filename   = path.basename(audioPath);
-  const boundary   = '----HeyGenBoundary' + Date.now().toString(36);
-  const CRLF       = '\r\n';
-
-  const preamble = Buffer.from([
-    `--${boundary}${CRLF}`,
-    `Content-Disposition: form-data; name="file"; filename="${filename}"${CRLF}`,
-    `Content-Type: audio/mpeg${CRLF}`,
-    CRLF,
-  ].join(''));
-  const epilogue = Buffer.from(`${CRLF}--${boundary}--${CRLF}`);
-  const body     = Buffer.concat([preamble, fileBuffer, epilogue]);
 
   const res = await httpsPost(
     'upload.heygen.com',
     '/v1/asset',
     {
       'X-Api-Key': apiKey,
-      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      'Content-Type': 'audio/mpeg',
     },
-    body
+    fileBuffer
   );
 
   const json = JSON.parse(res.body.toString());
