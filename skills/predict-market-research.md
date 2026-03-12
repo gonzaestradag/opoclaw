@@ -17,13 +17,13 @@ For each market flagged by the scanner, gather intelligence from web sources, ru
 3. Runs NLP-style sentiment classification: bullish (YES), bearish (NO), neutral
 4. Compares sentiment consensus vs current market price to identify gaps
 5. Scores each market on research confidence
-6. Saves results to `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/research_results.json`
+6. Saves results to `${REPO_DIR}/workspace/prediction-market-bot/research_results.json`
 
 ## Input
 
-Reads from: `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/scan_results.json`
+Reads from: `${REPO_DIR}/workspace/prediction-market-bot/scan_results.json`
 
-If file does not exist or is older than 2 hours, tell Gonzalo to run `predict-market-scan` first.
+If file does not exist or is older than 2 hours, run `predict-market-scan` first.
 
 ## Data sources to search
 
@@ -89,7 +89,7 @@ Interpretation:
 
 ## Output format
 
-Save to `/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/research_results.json`:
+Save to `${REPO_DIR}/workspace/prediction-market-bot/research_results.json`:
 
 ```json
 {

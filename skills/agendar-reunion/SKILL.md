@@ -6,7 +6,7 @@ allowed-tools: Bash
 
 # agendar-reunion
 
-Schedule any type of event (meeting, dinner, call, lunch, etc.) on Gonzalo's Google Calendar.
+Schedule any type of event (meeting, dinner, call, lunch, etc.) on the user's Google Calendar.
 
 ## Triggers
 
@@ -49,7 +49,7 @@ echo "$RESULT"
 
 ## Step 3 — Respond
 
-Read the `message` field from the API response and confirm to Gonzalo in plain language.
+Read the `message` field from the API response and confirm to the user in plain language.
 
 - If `in_google: true`: "Listo. [Event] agendado el [date] a las [time]."
 - If `in_google: false`: "Guardado en el calendario local, pero Google Calendar necesita reconexión. Lo puedes hacer desde el dashboard."
@@ -57,7 +57,7 @@ Read the `message` field from the API response and confirm to Gonzalo in plain l
 
 ## Edge cases
 
-- **No time specified**: Ask Gonzalo what time before creating the event.
+- **No time specified**: Ask the user what time before creating the event.
 - **No date specified**: Ask which day.
 - **Ambiguous duration**: Default to 60 min and confirm it in your reply.
 - **Attendees mentioned** (e.g., "con Paola, con el equipo"): Include in the description field — e.g., "Asistentes: Paola, equipo de ventas". The calendar API does not send invites, so just log it.

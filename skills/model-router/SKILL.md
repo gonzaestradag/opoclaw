@@ -37,7 +37,7 @@ Route tasks to the right model — balance cost vs quality. Designed for Marcus 
 ## Decision tree
 
 ```
-Is this going directly to Gonzalo/customer? → Expensive model OK
+Is this going directly to the user/customer? → Expensive model OK
 Is this a draft or internal step? → Use gemini-flash
 Is this data transformation only? → gemini-flash or haiku
 Is this coding that goes to production? → kimi-k2

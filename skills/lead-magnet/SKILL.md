@@ -6,7 +6,7 @@ allowed-tools: Bash
 
 # lead-magnet
 
-Design high-converting lead magnets for Gonzalo's ventures. Designed for Aria (strategy) and Sofia (content) in OpoClaw.
+Design high-converting lead magnets for your ventures. Designed for Aria (strategy) and Sofia (content).
 
 ## What makes a great lead magnet
 
@@ -49,7 +49,7 @@ Provide:
 ## Save concept
 
 ```bash
-cat >> /Users/opoclaw1/claudeclaw/workspace/lead-magnets.md << EOF
+cat >> ${REPO_DIR}/workspace/lead-magnets.md << EOF
 
 ## [DATE] — [TITLE]
 Target: [who]

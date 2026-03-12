@@ -4,7 +4,7 @@ Create talking avatar videos using D-ID + ffmpeg in OpoClaw style.
 
 ## When to use this skill
 
-Trigger when Gonzalo asks to:
+Trigger when the user asks to:
 - Create a talking video with an avatar
 - Generate a video with Thorn or any agent speaking
 - Make a video announcement, presentation, or message
@@ -12,7 +12,7 @@ Trigger when Gonzalo asks to:
 
 ## Setup
 
-- D-ID API key: stored in `/Users/opoclaw1/claudeclaw/.env` as `DID_API_KEY`
+- D-ID API key: stored in `${REPO_DIR}/.env` as `DID_API_KEY`
 - Auth format: `Authorization: Basic {DID_API_KEY}` (the key is already in Basic auth format)
 - D-ID base URL: `https://api.d-id.com`
 - ffmpeg: installed at `/opt/homebrew/bin/ffmpeg` (v8.0.1)
@@ -20,24 +20,24 @@ Trigger when Gonzalo asks to:
 ## Assets
 
 ### Thorn Avatar
-- PNG: `/Users/opoclaw1/claudeclaw/dashboard/public/avatars/thorn.png`
-- JPG: `/Users/opoclaw1/claudeclaw/dashboard/public/avatars/thorn.jpg`
+- PNG: `${REPO_DIR}/dashboard/public/avatars/thorn.png`
+- JPG: `${REPO_DIR}/dashboard/public/avatars/thorn.jpg`
 - Use the PNG for D-ID (cleaner edges, transparent-capable)
 
 ### Other Agent Avatars
-All agent portraits are at `/Users/opoclaw1/claudeclaw/dashboard/public/avatars/{agent-id}.png`
+All agent portraits are at `${REPO_DIR}/dashboard/public/avatars/{agent-id}.png`
 Examples: `marcus-reyes.png`, `jordan-walsh.png`, `aria-nakamura.png`, etc.
 
 ### OpoClaw Branding
-- Logo SVG: `/Users/opoclaw1/claudeclaw/workspace/opoclaw-logo-transparent.svg`
-- Logo HD PNG: `/Users/opoclaw1/claudeclaw/workspace/opoclaw-logo-hd.png`
+- Logo SVG: `${REPO_DIR}/workspace/opoclaw-logo-transparent.svg`
+- Logo HD PNG: `${REPO_DIR}/workspace/opoclaw-logo-hd.png`
 
 ## D-ID API — Create Talking Video
 
 ### Step 1: Create a talk (POST /talks)
 
 ```bash
-DID_KEY=$(grep DID_API_KEY /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+DID_KEY=$(grep DID_API_KEY ${REPO_DIR}/.env | cut -d= -f2)
 
 # Using a hosted image URL (D-ID requires publicly accessible URL)
 # If avatar is local, upload to a temp host or use D-ID's /images endpoint first
@@ -113,11 +113,11 @@ curl -s -X POST "https://api.d-id.com/talks" \
 D-ID requires public URLs. To use local avatars, upload first:
 
 ```bash
-DID_KEY=$(grep DID_API_KEY /Users/opoclaw1/claudeclaw/.env | cut -d= -f2)
+DID_KEY=$(grep DID_API_KEY ${REPO_DIR}/.env | cut -d= -f2)
 
 UPLOAD_RESP=$(curl -s -X POST "https://api.d-id.com/images" \
   -H "Authorization: Basic $DID_KEY" \
-  -F "image=@/Users/opoclaw1/claudeclaw/dashboard/public/avatars/thorn.png")
+  -F "image=@${REPO_DIR}/dashboard/public/avatars/thorn.png")
 
 IMAGE_URL=$(echo "$UPLOAD_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['url'])")
 echo "Hosted image URL: $IMAGE_URL"
@@ -139,7 +139,7 @@ ffmpeg -i /tmp/talking-avatar.mp4 \
 
 ```bash
 ffmpeg -i /tmp/talking-avatar.mp4 \
-  -i /Users/opoclaw1/claudeclaw/workspace/opoclaw-logo-hd.png \
+  -i ${REPO_DIR}/workspace/opoclaw-logo-hd.png \
   -filter_complex "overlay=20:20" \
   -c:a copy \
   /tmp/output-with-logo.mp4
@@ -185,15 +185,15 @@ ffmpeg -i /tmp/talking-avatar.mp4 -vcodec libx264 -crf 23 -preset fast /tmp/comp
 ## Full Workflow: Script to Final Video
 
 ```
-1. Gonzalo provides script/text
-2. (Optional) Generate TTS via ElevenLabs: node /Users/opoclaw1/claudeclaw/dist/index.js tts "text"
+1. User provides script/text
+2. (Optional) Generate TTS via ElevenLabs: node ${REPO_DIR}/dist/index.js tts "text"
 3. Upload avatar to D-ID: POST /images → get hosted URL
 4. Create talk: POST /talks with source_url + script → get talk_id
 5. Poll: GET /talks/{id} until status = "done" → get result_url
 6. Download video: curl -o output.mp4 {result_url}
 7. Compose with ffmpeg: add logo, text, intro, music as needed
 8. Send to Telegram: [SEND_FILE:/path/to/output.mp4|caption]
-9. Save to Brain Vault: bash /Users/opoclaw1/claudeclaw/scripts/brain-save.sh /path/to/output.mp4 "Negocio"
+9. Save to Brain Vault: bash ${REPO_DIR}/scripts/brain-save.sh /path/to/output.mp4 "Negocio"
 ```
 
 ## ElevenLabs Voice IDs (for D-ID TTS provider)
@@ -205,12 +205,12 @@ ffmpeg -i /tmp/talking-avatar.mp4 -vcodec libx264 -crf 23 -preset fast /tmp/comp
 - Plan: Pro
 - Total: 600 credits/month
 - Expiry: ~April 10, 2026
-- Check remaining: `bash /Users/opoclaw1/claudeclaw/scripts/test-did.sh`
+- Check remaining: `bash ${REPO_DIR}/scripts/test-did.sh`
 
 ## Verify API Working
 
 ```bash
-bash /Users/opoclaw1/claudeclaw/scripts/test-did.sh
+bash ${REPO_DIR}/scripts/test-did.sh
 ```
 
 Returns current credit balance if key is valid.

@@ -10,7 +10,7 @@ General-purpose deep research skill. Takes any topic and returns a structured, a
 
 ## Triggers
 
-Use when Gonzalo or an agent needs to understand something: a technology, a product category, a concept, a market trend, specific tools, examples, or background context on any topic.
+Use when the user or an agent needs to understand something: a technology, a product category, a concept, a market trend, specific tools, examples, or background context on any topic.
 
 ## Required input
 
@@ -94,7 +94,7 @@ TRENDS / WHAT'S HAPPENING NOW
 
 RELEVANT TO OPOCLAW
 --------------------
-[Concrete takeaway: what Gonzalo can use, steal, avoid, or build on. Be specific.]
+[Concrete takeaway: what the user can use, steal, avoid, or build on. Be specific.]
 ```
 
 ## Depth modes
@@ -106,23 +106,23 @@ RELEVANT TO OPOCLAW
 ## Save output (medium/deep)
 
 ```bash
-RESEARCH_FILE="/Users/opoclaw1/claudeclaw/workspace/research/$(date +%Y%m%d)-[topic-slug].md"
-mkdir -p /Users/opoclaw1/claudeclaw/workspace/research
+RESEARCH_FILE="${REPO_DIR}/workspace/research/$(date +%Y%m%d)-[topic-slug].md"
+mkdir -p ${REPO_DIR}/workspace/research
 # Write the full brief to this file
 echo "Saved: $RESEARCH_FILE"
 ```
 
 ## Save to Brain Vault (medium/deep always, quick on request)
 
-After writing the research file, also save a summary card to the Brain Vault so Gonzalo can find it from the dashboard:
+After writing the research file, also save a summary card to the Brain Vault so the user can find it from the dashboard:
 
 ```bash
 BRIEF_CONTENT="RESEARCH BRIEF: [TOPIC] — [DATE]\n\n[PASTE FULL BRIEF CONTENT HERE]"
 TOPIC_SLUG="[topic-slug]"
-RESEARCH_FILE="/Users/opoclaw1/claudeclaw/workspace/research/$(date +%Y%m%d)-${TOPIC_SLUG}.md"
+RESEARCH_FILE="${REPO_DIR}/workspace/research/$(date +%Y%m%d)-${TOPIC_SLUG}.md"
 
 # Save to brain_vault (fallback if API is down)
-sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO brain_vault (title, content, type, tags, file_path, starred, created_at) VALUES (
     'Research: [TOPIC]',
     '$(head -c 2000 "$RESEARCH_FILE" | sed "s/'/''/g")',
@@ -144,10 +144,10 @@ curl -s -X POST http://localhost:3001/api/brain/vault \
 
 ```bash
 # Always check if this topic was already researched
-sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "SELECT title, created_at FROM brain_vault WHERE title LIKE '%[TOPIC]%' AND type='research' ORDER BY created_at DESC LIMIT 3;" 2>/dev/null
 # Also check the research folder
-ls /Users/opoclaw1/claudeclaw/workspace/research/ 2>/dev/null | grep -i "[topic-keyword]" | tail -5
+ls ${REPO_DIR}/workspace/research/ 2>/dev/null | grep -i "[topic-keyword]" | tail -5
 ```
 
 If a fresh brief exists (< 7 days old), return it directly instead of re-running all searches.
@@ -155,6 +155,6 @@ If a fresh brief exists (< 7 days old), return it directly instead of re-running
 ## Log to OpoClaw
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('rafael-silva','Rafael','🔍','Research completado: [topic]','success','intelligence',datetime('now'))"
 ```

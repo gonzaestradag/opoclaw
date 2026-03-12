@@ -6,17 +6,17 @@ allowed-tools: Bash, WebSearch, WebFetch
 
 # meeting-prep
 
-Prepare Gonzalo for any meeting in under 2 minutes. Designed for Maya (operations) in OpoClaw.
+Prepare for any meeting in under 2 minutes. Designed for Maya (operations) in OpoClaw.
 
 ## Triggers
 
-When Gonzalo has a meeting coming up and wants context, an agenda, or talking points.
+When there is a meeting coming up and context, an agenda, or talking points are needed.
 
 ## Required inputs (ask if not given)
 
 1. Who is the meeting with? (name, company, role)
 2. What is the meeting about?
-3. What does Gonzalo want to achieve? (goal)
+3. What is the desired outcome? (goal)
 4. How long is the meeting?
 
 ## Workflow
@@ -72,14 +72,14 @@ Body:
 - We agreed on [X]
 - Next step: [Y] by [date]
 
-Let me know if anything's off. [Gonzalo]"
+Let me know if anything's off. [YOUR_NAME]"
 ```
 
 ## Save brief
 
 ```bash
-MEETING_FILE="/Users/opoclaw1/claudeclaw/workspace/meetings/$(date +%Y%m%d)-meeting-brief.md"
-mkdir -p /Users/opoclaw1/claudeclaw/workspace/meetings
+MEETING_FILE="${REPO_DIR}/workspace/meetings/$(date +%Y%m%d)-meeting-brief.md"
+mkdir -p ${REPO_DIR}/workspace/meetings
 # [write brief to file]
 echo "Brief saved: $MEETING_FILE"
 ```

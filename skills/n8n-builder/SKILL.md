@@ -18,7 +18,7 @@ n8n is a workflow automation tool (like Zapier but self-hostable). It connects a
 2. **Morning brief trigger**: Cron → fetch emails + calendar + news → compile → send via Telegram
 3. **Lead capture**: Form submission → add to Neon DB → notify Thorn via Telegram
 4. **Content pipeline**: RSS feed → summarize with AI → draft post → schedule via Publora
-5. **Cost alert**: Cron → check Jordan's cost API → if over threshold → alert Gonzalo
+5. **Cost alert**: Cron → check Jordan's cost API → if over threshold → alert the user
 
 ## Design a workflow
 
@@ -62,6 +62,6 @@ n8n start &
 ## Log activity
 
 ```bash
-sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \
+sqlite3 ${REPO_DIR}/store/opoclaw.db \
   "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('silas-vane','Silas','⚡','Built n8n automation workflow','success','engineering',datetime('now'))"
 ```

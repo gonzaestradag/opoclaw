@@ -14,13 +14,13 @@ Risk validation and order execution for prediction market trades. Runs all manda
 
 **CURRENT STATUS: PAPER TRADING MODE**
 
-No real orders are placed until Gonzalo explicitly provides API keys AND says "activate live trading". Until then, all "orders" are logged to `paper_trades.json` as simulations.
+No real orders are placed until the user explicitly provides API keys AND says "activate live trading". Until then, all "orders" are logged to `paper_trades.json` as simulations.
 
 Live trading activation checklist:
 - [ ] POLYMARKET_API_KEY in .env
 - [ ] KALSHI_API_KEY in .env
 - [ ] KALSHI_API_SECRET in .env
-- [ ] Gonzalo says "activate live trading" explicitly
+- [ ] User says "activate live trading" explicitly
 - [ ] All risk checks passing for at least 14 paper trades
 
 ## What this skill does
@@ -35,17 +35,17 @@ Live trading activation checklist:
 ## Input
 
 Reads pending signals from:
-`/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/predictions_log.json`
+`${REPO_DIR}/workspace/prediction-market-bot/predictions_log.json`
 
 Also reads current portfolio state:
-`/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/paper_trades.json`
+`${REPO_DIR}/workspace/prediction-market-bot/paper_trades.json`
 
 ## MANDATORY risk checks — ALL must pass
 
 Run before every order:
 
 ```bash
-python3 /Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/validate_risk.py \
+python3 ${REPO_DIR}/workspace/prediction-market-bot/validate_risk.py \
   --edge [EDGE_VALUE] \
   --p_model [P_MODEL] \
   --p_market [P_MARKET] \
@@ -68,13 +68,13 @@ If the script exits with code 1 (any check failed), DO NOT proceed. Log the fail
 | Max per position | 5% of bankroll | Cap position size |
 | Max concurrent positions | 15 | Block new trades |
 | Max total exposure | 40% of bankroll | Block new trades |
-| Max daily AI cost | $50 | Alert Gonzalo, reduce scan frequency |
+| Max daily AI cost | $50 | Alert the user, reduce scan frequency |
 | 95% VaR | Within daily limit | Warn, reduce size |
 
 ### Kelly Criterion position sizing
 
 ```bash
-python3 /Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/kelly_size.py \
+python3 ${REPO_DIR}/workspace/prediction-market-bot/kelly_size.py \
   --p_win [P_MODEL] \
   --payout_odds [PAYOUT_RATIO] \
   --bankroll [BANKROLL] \
@@ -191,7 +191,7 @@ Check and update open paper positions:
 python3 -c "
 import json, datetime
 
-with open('/Users/opoclaw1/claudeclaw/workspace/prediction-market-bot/paper_trades.json') as f:
+with open('${REPO_DIR}/workspace/prediction-market-bot/paper_trades.json') as f:
     trades = json.load(f)
 
 open_trades = [t for t in trades if t['status'] == 'open']

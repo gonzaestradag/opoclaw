@@ -57,11 +57,11 @@ curl -s -X POST http://localhost:3001/api/tasks \
   }'
 ```
 
-### Step 4 — Notify Gonzalo once
+### Step 4 — Notify the user once
 
 Send ONE message with the breakdown:
 ```bash
-bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "Meta: [goal]. Partida en [N] subtareas: [agent1] → [task1], [agent2] → [task2], etc. Te aviso cuando cada una acabe."
+bash ${REPO_DIR}/scripts/tg-notify.sh "Meta: [goal]. Partida en [N] subtareas: [agent1] → [task1], [agent2] → [task2], etc. Te aviso cuando cada una acabe."
 ```
 
 ### Step 5 — Done. Thorn is free.
