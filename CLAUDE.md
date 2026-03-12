@@ -573,6 +573,64 @@ This builds the frontend and restarts the server. Changes then appear live at lo
 - Pure backend changes to `src/` server code (use `pm2 restart dashboard-server` instead)
 - Changes to scripts, prompts, or agent config only
 
+## Video Generation — Thorn Speaking on Camera
+
+Gonzalo puede pedirle a Thorn que genere un video de Thorn hablando sobre cualquier tema. El sistema usa ElevenLabs (voz clonada) + HeyGen (Photo Avatar de Thorn) para producir un MP4 y enviarlo por Telegram.
+
+**Triggers:** "hazme un video sobre X", "genera un video de X", "crea un video explicando X", "make a video about X"
+
+**Cómo ejecutar:**
+
+```bash
+# Formato básico
+node /Users/opoclaw1/claudeclaw/scripts/generate-video.cjs "Script completo aquí" "Título del video"
+
+# Con ruta de salida específica
+node /Users/opoclaw1/claudeclaw/scripts/generate-video.cjs "Script aquí" "Reporte de Trading" /tmp/trading-report.mp4
+```
+
+**Flujo completo:**
+1. Thorn genera el script del video (basado en lo que Gonzalo pidió)
+2. ElevenLabs convierte el script a audio con la voz clonada
+3. HeyGen anima la foto de Thorn como talking head
+4. El video MP4 (720p) llega por Telegram en ~8 minutos
+5. Thorn ackea inmediatamente: "Generando el video, llega en ~8 min."
+
+**Tiempo de generación:** ~5–10 minutos (async — Thorn NO bloquea)
+
+**Costo por video:** ~$0.50–$1.00 USD (créditos HeyGen)
+
+**Regla de delegación:** Siempre run_in_background: true. Thorn ackea, el script corre en background, cuando termina el MP4 llega directo a Telegram. No se necesita monitor agent.
+
+**Setup requerido (una sola vez):**
+Si `HEYGEN_API_KEY` o `HEYGEN_THORN_AVATAR_ID` están vacíos en `.env`:
+```bash
+# 1. Agregar API key de HeyGen en .env:
+#    HEYGEN_API_KEY=tu_key_de_app.heygen.com/settings/api
+#
+# 2. Crear el avatar de Thorn (una sola vez):
+node /Users/opoclaw1/claudeclaw/scripts/setup-heygen-avatar.cjs
+# → Sube thorn.jpg a HeyGen y guarda el avatar ID en .env automáticamente
+```
+
+**Ejemplos de uso por Telegram:**
+- "hazme un video resumen del reporte de trading de esta semana"
+  → Thorn toma el reporte, genera script, produce video de ~2 min
+- "crea un video explicando cómo funciona nuestro sistema de agentes para mandarle a un cliente"
+  → Thorn genera pitch video profesional
+- "genera un video de Thorn explicando este documento [adjunto]"
+  → Thorn lee el doc, extrae puntos clave, produce video
+
+**Variables en .env:**
+```
+HEYGEN_API_KEY=          # De app.heygen.com/settings/api
+HEYGEN_THORN_AVATAR_ID=  # Se llena corriendo setup-heygen-avatar.cjs
+ELEVENLABS_API_KEY=      # Ya configurado — voz clonada
+ELEVENLABS_VOICE_ID=     # Ya configurado — ID de la voz
+```
+
+---
+
 ## Available Skills (invoke automatically when relevant)
 
 **Invoke skills directly using the `Skill` tool — never via Task tool delegation.** Skills run inline in Thorn's conversation. Some skills (like `phone-call`) require a confirmation step before taking action — handle that in-conversation, do not background it.
