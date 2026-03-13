@@ -287,7 +287,10 @@ function closeDrawer() {
 
 function api(path) {
   const sep = path.includes('?') ? '&' : '?';
-  return fetch(BASE + path + sep + 'token=' + TOKEN).then(r => r.json());
+  return fetch(BASE + path + sep + 'token=' + TOKEN).then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
 }
 
 let salienceChart, memTimelineChart, costChart, cacheChart;

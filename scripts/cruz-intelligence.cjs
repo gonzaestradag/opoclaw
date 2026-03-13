@@ -28,7 +28,7 @@ const { execSync } = require('child_process');
 const BASE        = '/Users/opoclaw1/opoclaw';
 const CC_BASE     = '/Users/opoclaw1/claudeclaw';
 const SIGNAL_PATH = path.join(CC_BASE, 'store/market_signal.json');  // unified path in ClaudeClaw store
-const DB_PATH     = path.join(CC_BASE, 'store/opoclaw.db');           // ClaudeClaw main DB (agents table lives here)
+const DB_PATH     = path.join(CC_BASE, 'store/claudeclaw.db');        // ClaudeClaw main DB (agents table lives here)
 const LOG_PATH    = path.join(BASE, 'logs/cruz-intelligence.log');
 const ENV_PATH    = path.join(CC_BASE, '.env');                        // ClaudeClaw .env has OPENAI_API_KEY
 

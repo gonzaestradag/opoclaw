@@ -4,7 +4,8 @@
 # techniques, updates its knowledge file, and creates new skills if gaps found.
 # SILENT — zero Telegram, zero output to console.
 
-DB="/Users/opoclaw1/claudeclaw/store/opoclaw.db"
+DB="/Users/opoclaw1/claudeclaw/store/claudeclaw.db"
+unset CLAUDECODE  # prevent "nested session" error when claude CLI is called from PM2
 AGENTS_DIR="/Users/opoclaw1/claudeclaw/workspace/agents"
 SKILLS_DIR="/Users/opoclaw1/.claude/skills"
 LOG="/tmp/iq-boost-$(date +%Y%m%d).log"
@@ -247,7 +248,7 @@ TRADING_PROMPT="You are Victoria Cross, Ventures Director at OpoClaw. Tonight's 
    - Any new signals or indicators worth adding
    - Risk assessment for current positions
 4. Log your work:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('victoria-cross','Victoria','👑','Nightly trading strategy research complete','success','ventures',datetime('now'))\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('victoria-cross','Victoria','👑','Nightly trading strategy research complete','success','ventures',datetime('now'))\"
 
 Write the memo now. Be specific and actionable."
 
@@ -263,19 +264,20 @@ log "Running UI improvement scan..."
 DASHBOARD_PAGES=$(ls /Users/opoclaw1/claudeclaw/dashboard/src/pages/*.tsx 2>/dev/null | xargs -I{} basename {} | tr '\n' ', ')
 RECENT_ERRORS=$(sqlite3 "$DB" "SELECT action FROM agent_activity WHERE type='error' AND created_at >= datetime('now','-3 days') ORDER BY created_at DESC LIMIT 20;" 2>/dev/null | head -10)
 
-UI_PROMPT="You are Lucas Park, Frontend Engineer at OpoClaw. Tonight: audit the dashboard UI and implement one clear improvement.
+UI_PROMPT="You are Lucas Park, Frontend Engineer at OpoClaw. Tonight: audit the dashboard UI and write a prioritized list of improvements — do NOT make any code changes or deploy anything.
 
 Dashboard pages available: $DASHBOARD_PAGES
 Recent system errors: $RECENT_ERRORS
 
 Steps:
-1. Read /Users/opoclaw1/claudeclaw/dashboard/src/pages/Agents.tsx — identify the most impactful bug or missing feature
-2. Implement ONE fix (keep it small, safe, and self-contained)
-3. Run: bash /Users/opoclaw1/claudeclaw/scripts/deploy-dashboard.sh
-4. Log what you did:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('lucas-park','Lucas','⚡','Nightly UI fix: [describe what you fixed]','success','engineering',datetime('now'))\"
+1. Read /Users/opoclaw1/claudeclaw/dashboard/src/pages/Agents.tsx
+2. Read /Users/opoclaw1/claudeclaw/dashboard/src/pages/Index.tsx
+3. Identify the top 3 bugs or missing features — be specific (file, line, what's wrong, what it should be)
+4. Write your findings to /tmp/ui-audit-$(date +%Y%m%d).md with: priority, file, issue, proposed fix
+5. Log:
+   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('lucas-park','Lucas','⚡','Nightly UI audit complete — top bugs documented','info','engineering',datetime('now'))\"
 
-Focus on: IQ scores not displayed, broken links, missing data, visual bugs. Do NOT refactor — just fix one thing cleanly."
+IMPORTANT: Read-only audit. No code edits. No deployments. Just document findings clearly so they can be reviewed and applied the next day."
 
 UI_RESULT=$(echo "$UI_PROMPT" | claude --model claude-haiku-4-5 -p - --output-format text 2>/dev/null)
 if [ -n "$UI_RESULT" ]; then
@@ -298,9 +300,9 @@ Tasks:
 1. Review the skill proposals above — for each one that would genuinely help the system, create the skill file at ~/.claude/skills/{slug}/prompt.md
 2. Check if any existing skills seem redundant or overlapping — note them (don't delete, just note)
 3. Update the skill_proposals table for created skills:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"UPDATE skill_proposals SET status='created', updated_at=$(date +%s) WHERE skill_slug='SLUG';\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"UPDATE skill_proposals SET status='created', updated_at=$(date +%s) WHERE skill_slug='SLUG';\"
 4. Log:
-   sqlite3 /Users/opoclaw1/claudeclaw/store/opoclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('marcus-reyes','Marcus','🔧','Nightly skill audit complete','success','engineering',datetime('now'))\"
+   sqlite3 /Users/opoclaw1/claudeclaw/store/claudeclaw.db \"INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES ('marcus-reyes','Marcus','🔧','Nightly skill audit complete','success','engineering',datetime('now'))\"
 
 Be decisive. If a skill proposal is good, build it tonight."
 
