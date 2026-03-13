@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Cruz Intelligence Agent v2
- * Runs every 4 hours via PM2 cron.
+ * Runs continuously — always researching, loops every 45 minutes.
  *
  * Data sources:
  *   - Binance public klines → RSI(14), EMA(20/50), trend, momentum per pair
@@ -26,10 +26,14 @@ const path  = require('path');
 const { execSync } = require('child_process');
 
 const BASE        = '/Users/opoclaw1/opoclaw';
-const SIGNAL_PATH = path.join(BASE, 'store/market_signal.json');
-const DB_PATH     = path.join(BASE, 'store/opoclaw.db');
+const CC_BASE     = '/Users/opoclaw1/claudeclaw';
+const SIGNAL_PATH = path.join(CC_BASE, 'store/market_signal.json');  // unified path in ClaudeClaw store
+const DB_PATH     = path.join(CC_BASE, 'store/opoclaw.db');           // ClaudeClaw main DB (agents table lives here)
 const LOG_PATH    = path.join(BASE, 'logs/cruz-intelligence.log');
-const ENV_PATH    = path.join(BASE, '.env');
+const ENV_PATH    = path.join(CC_BASE, '.env');                        // ClaudeClaw .env has OPENAI_API_KEY
+
+// How long to wait between cycles (milliseconds)
+const CYCLE_INTERVAL_MS = 45 * 60 * 1000; // 45 minutes
 
 // Blacklisted pairs — memecoins, stablecoins, wrapped tokens
 const BLACKLIST = new Set([
@@ -393,6 +397,26 @@ Be specific and actionable. Bots trade real money.`;
   return JSON.parse(raw);
 }
 
+// ── Agent status update ───────────────────────────────────────────────────────
+function setAgentStatus(status, task) {
+  const tmpPy = `/tmp/cruz_status_${Date.now()}.py`;
+  const taskVal = task ? JSON.stringify(task) : 'None';
+  fs.writeFileSync(tmpPy, `import sqlite3
+db = sqlite3.connect(${JSON.stringify(DB_PATH)})
+db.execute("UPDATE agents SET status=?, current_task=?, updated_at=unixepoch() WHERE id='cruz-intelligence'",
+           (${JSON.stringify(status)}, ${taskVal}))
+db.commit()
+db.close()
+`);
+  try {
+    execSync(`python3 "${tmpPy}"`, { encoding: 'utf8' });
+  } catch (e) {
+    log(`Status update failed: ${e.message.split('\n')[0]}`);
+  } finally {
+    try { fs.unlinkSync(tmpPy); } catch {}
+  }
+}
+
 // ── SQLite log ────────────────────────────────────────────────────────────────
 function logToDB(signal) {
   const tmpJson = `/tmp/cruz_signal_${Date.now()}.json`;
@@ -404,14 +428,18 @@ import sqlite3, json
 with open(${JSON.stringify(tmpJson)}) as f:
     d = json.load(f)
 db = sqlite3.connect(${JSON.stringify(DB_PATH)})
-db.execute(
-    "INSERT INTO trading_intelligence (sentiment,confidence,risk_level,avoid_pairs,trending_pairs,key_insights,news_summary) VALUES (?,?,?,?,?,?,?)",
-    (d['global_sentiment'], d['global_confidence'], d['global_risk'],
-     json.dumps([p for p,v in d.get('pairs',{}).items() if v.get('avoid')]),
-     json.dumps([p for p,v in d.get('pairs',{}).items() if v.get('signal')=='buy']),
-     json.dumps([f"{p}: {v.get('reason','')}" for p,v in d.get('pairs',{}).items() if v.get('signal')=='buy'][:3]),
-     d.get('news_summary',''))
-)
+# Log to trading_intelligence if table exists
+try:
+    db.execute(
+        "INSERT INTO trading_intelligence (sentiment,confidence,risk_level,avoid_pairs,trending_pairs,key_insights,news_summary) VALUES (?,?,?,?,?,?,?)",
+        (d['global_sentiment'], d['global_confidence'], d['global_risk'],
+         json.dumps([p for p,v in d.get('pairs',{}).items() if v.get('avoid')]),
+         json.dumps([p for p,v in d.get('pairs',{}).items() if v.get('signal')=='buy']),
+         json.dumps([f"{p}: {v.get('reason','')}" for p,v in d.get('pairs',{}).items() if v.get('signal')=='buy'][:3]),
+         d.get('news_summary',''))
+    )
+except Exception:
+    pass
 db.execute(
     "INSERT INTO agent_activity (agent_id,agent_name,agent_emoji,action,type,department,created_at) VALUES (?,?,?,?,?,?,datetime('now'))",
     ('cruz-intelligence', 'Cruz', '🔍',
@@ -432,13 +460,15 @@ print('ok')
   }
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
-async function main() {
-  log('Cruz Intelligence v2 — starting analysis cycle');
+// ── Main analysis cycle ───────────────────────────────────────────────────────
+async function runCycle() {
+  log('Cruz Intelligence — starting analysis cycle');
+  setAgentStatus('researching', 'Analyzing top 30 crypto pairs — RSI, EMA, news, sentiment');
 
   if (!OPENAI_KEY) {
     log('ERROR: OPENAI_API_KEY not set');
-    process.exit(1);
+    setAgentStatus('idle');
+    return;
   }
 
   // Get dynamic pair list first
@@ -520,10 +550,30 @@ async function main() {
 
   logToDB(signal);
 
-  log('Cruz Intelligence v2 — cycle complete. Per-pair signals live.');
+  log('Cruz Intelligence — cycle complete. Per-pair signals live.');
+  setAgentStatus('idle');
 }
 
-main().catch(e => {
+// ── Continuous loop ───────────────────────────────────────────────────────────
+async function loop() {
+  log('Cruz Intelligence — starting continuous research mode');
+  // Ensure signal dir exists
+  try { fs.mkdirSync(path.dirname(SIGNAL_PATH), { recursive: true }); } catch {}
+
+  while (true) {
+    try {
+      await runCycle();
+    } catch (e) {
+      log(`Cycle error: ${e.message}`);
+      setAgentStatus('idle');
+    }
+
+    log(`Next cycle in ${CYCLE_INTERVAL_MS / 60000} minutes...`);
+    await new Promise(r => setTimeout(r, CYCLE_INTERVAL_MS));
+  }
+}
+
+loop().catch(e => {
   log(`FATAL: ${e.message}`);
   process.exit(1);
 });

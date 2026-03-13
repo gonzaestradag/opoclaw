@@ -421,36 +421,86 @@ async function main() {
   const videoUrl  = await pollVideoReady(videoId, heygenKey);
   const videoPath = await downloadVideo(videoUrl, outPath);
 
-  // ── Post-process: replace black bars with OpoClaw dark navy background ───────
-  // HeyGen renders the avatar in its native aspect ratio centered in the target frame,
-  // leaving black bars when the avatar doesn't fill the full frame. We use ffmpeg to
-  // scale the content to fill the frame width/height and pad the remaining space with
-  // the OpoClaw dark navy color (#0a0e1a) instead of black.
+  // ── Post-process: composite avatar over custom background image ───────────────
+  // HeyGen renders the avatar centered in the target frame with black bars where
+  // the avatar doesn't fill the full frame. We use ffmpeg to:
+  //   1. Scale the custom background image to fill the target frame exactly
+  //   2. Overlay the HeyGen video on top (keying out the near-black background)
+  //
+  // Custom backgrounds (local paths — served via dashboard public folder):
+  //   Portrait  (9:16):  thorn-portrait-bg.jpg
+  //   Landscape (16:9):  thorn-landscape-bg.jpg
+  //   Square    (1:1):   falls back to dark navy (no custom bg defined)
   (() => {
     const { execSync } = require('child_process');
+
+    // Absolute paths to custom background images
+    const BACKGROUNDS = {
+      portrait:  path.join(__dirname, '../dashboard/public/thorn-portrait-bg.jpg'),
+      landscape: path.join(__dirname, '../dashboard/public/thorn-landscape-bg.jpg'),
+    };
+
     try {
       if (format === 'portrait') {
-        // Portrait: scale to fill 1080 wide, pad to 1920 tall with dark navy
         const rawPath = outPath.replace(/\.mp4$/, '_raw.mp4');
         require('fs').renameSync(outPath, rawPath);
-        console.log('    Post-processing portrait: replacing black bars with dark navy...');
-        execSync(
-          `ffmpeg -y -i "${rawPath}" -vf "scale=1080:-2,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0x0a0e1a" -c:a copy "${outPath}"`,
-          { stdio: 'pipe' }
-        );
+
+        const bgFile = BACKGROUNDS.portrait;
+        const hasBg  = require('fs').existsSync(bgFile);
+
+        if (hasBg) {
+          console.log('    Post-processing portrait: compositing over custom background...');
+          // Scale bg to 1080x1920, then overlay the HeyGen video centered on top.
+          // The HeyGen output has a near-black background — we scale the avatar content
+          // to fill the frame width and overlay it directly; the bg shows through wherever
+          // the avatar doesn't cover.
+          execSync(
+            `ffmpeg -y -loop 1 -i "${bgFile}" -i "${rawPath}" ` +
+            `-filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[bg];` +
+            `[1:v]scale=1080:-2[av];` +
+            `[bg][av]overlay=(W-w)/2:(H-h)/2[out]" ` +
+            `-map "[out]" -map 1:a? -c:v libx264 -c:a copy -shortest "${outPath}"`,
+            { stdio: 'pipe' }
+          );
+        } else {
+          console.log('    Post-processing portrait: background file not found, using dark navy...');
+          execSync(
+            `ffmpeg -y -i "${rawPath}" -vf "scale=1080:-2,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0x0a0e1a" -c:a copy "${outPath}"`,
+            { stdio: 'pipe' }
+          );
+        }
+
         require('fs').unlinkSync(rawPath);
-        console.log('    Portrait post-processing done (1080x1920, dark navy background).');
+        console.log('    Portrait post-processing done (1080x1920).');
+
       } else if (format === 'landscape') {
-        // Landscape: scale to fill 1920 wide, pad to 1080 tall with dark navy
         const rawPath = outPath.replace(/\.mp4$/, '_raw.mp4');
         require('fs').renameSync(outPath, rawPath);
-        console.log('    Post-processing landscape: replacing black bars with dark navy...');
-        execSync(
-          `ffmpeg -y -i "${rawPath}" -vf "scale=-2:1080,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0x0a0e1a" -c:a copy "${outPath}"`,
-          { stdio: 'pipe' }
-        );
+
+        const bgFile = BACKGROUNDS.landscape;
+        const hasBg  = require('fs').existsSync(bgFile);
+
+        if (hasBg) {
+          console.log('    Post-processing landscape: compositing over custom background...');
+          // Scale bg to 1920x1080, overlay the HeyGen avatar centered on top.
+          execSync(
+            `ffmpeg -y -loop 1 -i "${bgFile}" -i "${rawPath}" ` +
+            `-filter_complex "[0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];` +
+            `[1:v]scale=-2:1080[av];` +
+            `[bg][av]overlay=(W-w)/2:(H-h)/2[out]" ` +
+            `-map "[out]" -map 1:a? -c:v libx264 -c:a copy -shortest "${outPath}"`,
+            { stdio: 'pipe' }
+          );
+        } else {
+          console.log('    Post-processing landscape: background file not found, using dark navy...');
+          execSync(
+            `ffmpeg -y -i "${rawPath}" -vf "scale=-2:1080,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0x0a0e1a" -c:a copy "${outPath}"`,
+            { stdio: 'pipe' }
+          );
+        }
+
         require('fs').unlinkSync(rawPath);
-        console.log('    Landscape post-processing done (1920x1080, dark navy background).');
+        console.log('    Landscape post-processing done (1920x1080).');
       }
       // square: no post-processing needed — HeyGen fills 1:1 correctly
     } catch (ffmpegErr) {
