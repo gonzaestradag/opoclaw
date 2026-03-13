@@ -344,17 +344,86 @@ Never open-ended. The user should always know exactly what to type.
 
    Ask all of these as yes/no first, then collect keys only for what they want:
 
-   j. Cloudflare Tunnel (access dashboard from anywhere, not just home network)
-      → EN: "Do you want to access your OpoClaw dashboard from anywhere — not just at home? This uses Cloudflare Tunnel, which is free. (yes / later / skip)"
-      → ES: "¿Quieres acceder a tu dashboard de OpoClaw desde cualquier lugar, no solo en casa? Esto usa Cloudflare Tunnel, que es gratis. (sí / después / omitir)"
+   j. Cloudflare Tunnel ⭐ STRONGLY RECOMMENDED
+      → EN: "Do you want to access your dashboard and give your glasses (VisionClaw) remote access from anywhere in the world? This uses Cloudflare Tunnel — it's free, takes 5 minutes, and makes a huge difference. (yes / later / skip)
+
+      **What Cloudflare Tunnel actually does:**
+      Right now your dashboard only works at http://localhost:3001 — and ONLY while you're on the same WiFi as your Mac. The moment you step out of the house, it's unreachable.
+
+      Cloudflare Tunnel creates a permanent public HTTPS URL (like https://opoclaw.yourdomain.com) that works from anywhere in the world — your phone on mobile data, a friend's house, another country. It runs as a background process and automatically reconnects if your Mac restarts.
+
+      **Why it matters for you:**
+      - Check your dashboard from your phone anywhere
+      - VisionClaw glasses work away from home (they need to reach your Mac)
+      - Your assistant can call external services that need a real HTTPS URL (Vapi webhooks, etc.)
+      - It's free. Cloudflare doesn't charge for this.
+
+      Highly recommended. Skip only if you'll always be on the same WiFi as your Mac. (yes / later / skip)"
+
+      → ES: "¿Quieres acceder a tu dashboard y darle acceso remoto a tus lentes (VisionClaw) desde cualquier lugar del mundo? Esto usa Cloudflare Tunnel — es gratis, tarda 5 minutos y hace una gran diferencia. (sí / después / omitir)
+
+      **Qué hace Cloudflare Tunnel:**
+      Ahora mismo tu dashboard solo funciona en http://localhost:3001 — y SOLO mientras estés en el mismo WiFi que tu Mac. En cuanto sales de casa, no se puede acceder.
+
+      Cloudflare Tunnel crea una URL pública permanente con HTTPS (como https://opoclaw.tudominio.com) que funciona desde cualquier parte del mundo — tu celular con datos, la casa de un amigo, otro país. Corre como proceso en segundo plano y se reconecta solo si tu Mac reinicia.
+
+      **Por qué te importa:**
+      - Ver tu dashboard desde el celular desde cualquier lugar
+      - Tus lentes VisionClaw funcionan fuera de casa (necesitan llegar a tu Mac)
+      - Tu asistente puede conectar servicios externos que necesitan una URL HTTPS real (webhooks de Vapi, etc.)
+      - Es gratis. Cloudflare no cobra por esto.
+
+      Muy recomendado. Omite solo si siempre estarás en el mismo WiFi que tu Mac. (sí / después / omitir)"
+
       If they say "later" or "skip":
-         → EN: "Sure? Without this the dashboard only works on your home network. Skip for now? (yes, skip / no, set it up now)"
-         → ES: "¿Seguro? Sin esto el dashboard solo funciona en tu red de casa. ¿Omitir por ahora? (sí, omitir / no, configúralo ahora)"
-         If they confirm skip → EN: "Got it. When you want remote access, tell your bot: 'help me set up Cloudflare Tunnel'." / ES: "Listo. Cuando quieras acceso remoto, dile a tu bot: 'ayúdame a configurar Cloudflare Tunnel'."
+         → EN: "Sure? Without this your dashboard and VisionClaw glasses only work on your home WiFi. If you travel or want phone access, you'll need it. Skip for now? (yes, skip / no, set it up now)"
+         → ES: "¿Seguro? Sin esto tu dashboard y tus lentes VisionClaw solo funcionan en tu WiFi de casa. Si viajas o quieres acceso desde el celular, lo vas a necesitar. ¿Omitir por ahora? (sí, omitir / no, configúralo ahora)"
+         If they confirm skip → EN: "Got it. When you want remote access, tell your bot: 'help me set up Cloudflare Tunnel' — I'll walk you through it." / ES: "Listo. Cuando quieras acceso remoto, dile a tu bot: 'ayúdame a configurar Cloudflare Tunnel' — te guío paso a paso."
          Then move to next section.
       If yes:
-      → EN: "Go to dash.cloudflare.com. Sign up free. Go to Zero Trust → Access → Tunnels → Create a tunnel. Name it 'opoclaw'. Under 'Install connector', copy the token (a long string starting with 'eyJ...'). Paste it here."
-      → ES: "Ve a dash.cloudflare.com. Regístrate gratis. Ve a Zero Trust → Access → Tunnels → Create a tunnel. Nómbralo 'opoclaw'. En 'Install connector', copia el token (una cadena larga que empieza con 'eyJ...'). Pégalo aquí."
+
+      STEP 1 — Create account and tunnel:
+      → EN: "Go to dash.cloudflare.com and create a free account (just email + password, no credit card).
+      Once inside: go to Zero Trust (left sidebar) → Networks → Tunnels → Create a tunnel.
+      Select 'Cloudflared' as connector type. Name it 'opoclaw'. Click Save tunnel."
+      → ES: "Ve a dash.cloudflare.com y crea una cuenta gratis (solo correo + contraseña, sin tarjeta).
+      Una vez adentro: ve a Zero Trust (sidebar izquierdo) → Networks → Tunnels → Create a tunnel.
+      Selecciona 'Cloudflared' como tipo de conector. Nómbralo 'opoclaw'. Haz clic en Save tunnel."
+
+      STEP 2 — Get the token:
+      → EN: "On the next screen you'll see 'Install connector'. Choose macOS. Copy the token — it's the long string after '--token' in the command they show you. Paste it here."
+      → ES: "En la siguiente pantalla verás 'Install connector'. Elige macOS. Copia el token — es la cadena larga que va después de '--token' en el comando que te muestran. Pégalo aquí."
+      Save as CLOUDFLARE_TUNNEL_TOKEN in .env.
+
+      STEP 3 — Install and start:
+      Run automatically:
+      ```
+      brew install cloudflared
+      cloudflared service install [CLOUDFLARE_TUNNEL_TOKEN]
+      ```
+
+      STEP 4 — Configure the public URL:
+      → EN: "Back in the Cloudflare dashboard: click your tunnel → Public Hostname → Add a public hostname.
+      Fill in:
+      - Subdomain: opoclaw (or anything you want)
+      - Domain: select one of your domains (if you have one) OR use the free .trycloudflare.com URL
+      - Service: HTTP, localhost:3001
+      Click Save.
+      What's the full URL it gave you? (e.g. opoclaw.yourdomain.com)"
+      → ES: "De vuelta en el dashboard de Cloudflare: haz clic en tu tunnel → Public Hostname → Add a public hostname.
+      Llena:
+      - Subdomain: opoclaw (o lo que quieras)
+      - Domain: selecciona uno de tus dominios (si tienes) O usa la URL gratuita .trycloudflare.com
+      - Service: HTTP, localhost:3001
+      Haz clic en Save.
+      ¿Cuál es la URL completa que te dio? (ej. opoclaw.tudominio.com)"
+      Save as DASHBOARD_URL in .env. Restart: `pm2 restart dashboard-server --update-env`
+
+      STEP 5 — Verify:
+      → EN: "Open your phone browser (on mobile data, NOT WiFi) and go to the URL above. Did you see the dashboard login screen? (yes / no)"
+      → ES: "Abre el navegador de tu celular (con datos móviles, NO WiFi) y ve a la URL de arriba. ¿Viste la pantalla de login del dashboard? (sí / no)"
+      If yes → tunnel is working. Confirm with: "Remote access confirmed. Your dashboard is now live at [DASHBOARD_URL] from anywhere in the world."
+      If no → check `cloudflared service list` to confirm the service is running.
 
    k. Vapi (AI phone calls — your assistant can make and receive calls)
       → EN: "Do you want your assistant to make AI phone calls? (yes / later / skip)"
@@ -597,24 +666,47 @@ Never open-ended. The user should always know exactly what to type.
    ```
    pm2 restart dashboard-server --update-env
    ```
+   Wait 3 seconds, then confirm the server is back up: `pm2 list` — the dashboard-server should show 'online'.
 
-   Step 5 — Show credentials:
-   → EN: "Dashboard login is set. Here's how to access it:
+   Step 5 — Verify the login actually works:
+   → EN: "The dashboard is secured. Now let's test the login.
 
-   - **URL:** http://localhost:3001
+   Go to: http://localhost:3001
+
+   You should see a login screen. Enter:
+   - Username: [DASHBOARD_USERNAME]
+   - Password: [what they typed]
+
+   Did it let you in and show the dashboard? (yes / no)"
+   → ES: "El dashboard está asegurado. Ahora probemos el login.
+
+   Ve a: http://localhost:3001
+
+   Deberías ver una pantalla de login. Ingresa:
+   - Usuario: [DASHBOARD_USERNAME]
+   - Contraseña: [lo que escribieron]
+
+   ¿Te dejó entrar y se ve el dashboard? (sí / no)"
+
+   If NO → check: is DASHBOARD_PASSWORD_HASH set correctly in .env? Re-run the bcrypt hash command and save again, then `pm2 restart dashboard-server --update-env`. Retry login.
+
+   If YES → show credentials summary:
+   → EN: "Login confirmed. Here are your dashboard credentials — save them somewhere safe:
+
+   - **URL (home WiFi):** http://localhost:3001
    - **Username:** [DASHBOARD_USERNAME]
    - **Password:** [what they typed]
-   - **Direct token (for API access):** [DASHBOARD_TOKEN]
+   - **Direct token (for API/VisionClaw):** [DASHBOARD_TOKEN]
 
-   Save these somewhere safe."
-   → ES: "Acceso al dashboard configurado. Así entras:
+   To access from anywhere (phone, outside home), set up Cloudflare Tunnel in the next section."
+   → ES: "Login confirmado. Aquí están tus credenciales del dashboard — guárdalas en un lugar seguro:
 
-   - **URL:** http://localhost:3001
+   - **URL (WiFi de casa):** http://localhost:3001
    - **Usuario:** [DASHBOARD_USERNAME]
    - **Contraseña:** [lo que escribieron]
-   - **Token directo (acceso API):** [DASHBOARD_TOKEN]
+   - **Token directo (para API/VisionClaw):** [DASHBOARD_TOKEN]
 
-   Guarda esto en un lugar seguro."
+   Para acceder desde cualquier lugar (celular, fuera de casa), configura Cloudflare Tunnel en la siguiente sección."
 
    If NO → diagnose (check pm2 list, check if port 3001 is open) before moving on.
 
