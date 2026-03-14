@@ -359,6 +359,11 @@ function isAuthorised(chatId: number): boolean {
   return chatId.toString() === ALLOWED_CHAT_ID;
 }
 
+/** Set Thorn to idle after a minimum 10s visible-active window so the dashboard always catches it. */
+function setThornIdle(): void {
+  setTimeout(() => setAgentStatus('thorn', 'idle', null), 10000);
+}
+
 /**
  * Core message handler. Called for every inbound text/voice/photo/document.
  * @param forceVoiceReply  When true, always respond with audio (e.g. user sent a voice note).
@@ -588,11 +593,11 @@ async function handleMessage(ctx: Context, message: string, forceVoiceReply = fa
     if (delegationAckSent) {
       agentPromise.then(() => {
         if (agentResult?.newSessionId) setSession(chatIdStr, agentResult.newSessionId);
-        setAgentStatus('thorn', 'idle', null);
+        setThornIdle();
         thornInputMode.delete(chatIdStr);
         try { fs.unlinkSync(tgNotifyFlagPath); } catch { /* ignore */ }
         try { fs.unlinkSync(ttsSentFlagPath); } catch { /* ignore */ }
-      }).catch(() => { setAgentStatus('thorn', 'idle', null); thornInputMode.delete(chatIdStr); });
+      }).catch(() => { setThornIdle(); thornInputMode.delete(chatIdStr); });
       return; // ← Thorn is FREE
     }
 
@@ -669,13 +674,13 @@ async function handleMessage(ctx: Context, message: string, forceVoiceReply = fa
           'success',
           { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens, costUsd: result.usage.totalCostUsd },
         );
-        setAgentStatus('thorn', 'idle', null);
+        setThornIdle();
         thornInputMode.delete(chatIdStr);
         const warning = checkContextWarning(chatIdStr, activeSessionId, result.usage);
         if (warning) await ctx.reply(warning);
       } else {
         logAgentActivity(`Completed: ${message.slice(0, 80)}`, 'success');
-        setAgentStatus('thorn', 'idle', null);
+        setThornIdle();
         thornInputMode.delete(chatIdStr);
       }
     };
@@ -705,7 +710,7 @@ async function handleMessage(ctx: Context, message: string, forceVoiceReply = fa
       await deliverResponse(agentResult);
     }).catch(err => {
       logger.error({ err }, 'Deferred agent error');
-      setAgentStatus('thorn', 'idle', null);
+      setThornIdle();
       thornInputMode.delete(chatIdStr);
       void ctx.reply('Algo salió mal. Revisa los logs.');
     });
@@ -718,7 +723,7 @@ async function handleMessage(ctx: Context, message: string, forceVoiceReply = fa
     thornInputMode.delete(chatIdStr);
     logger.error({ err }, 'Agent error');
     logAgentActivity(`Error processing: ${message.slice(0, 60)} — ${String(err).slice(0, 100)}`, 'error');
-    setAgentStatus('thorn', 'idle', null);
+    setThornIdle();
 
     // Detect context window exhaustion (process exits with code 1 after long sessions)
     const errMsg = err instanceof Error ? err.message : String(err);
@@ -1569,7 +1574,7 @@ export async function injectMessage(message: string, forceVoice = false): Promis
         { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens, costUsd: result.usage.totalCostUsd },
       );
     }
-    setAgentStatus('thorn', 'idle', null);
+    setThornIdle();
 
     // Send response — voice if forced (call flow), else text
     if (responseText) {
@@ -1598,7 +1603,7 @@ export async function injectMessage(message: string, forceVoice = false): Promis
     }
   } catch (err) {
     logger.error({ err }, '[inject] Agent error processing injected message');
-    setAgentStatus('thorn', 'idle', null);
+    setThornIdle();
     // Non-fatal — the dashboard-server fallback will handle Telegram notification
     throw err;
   }

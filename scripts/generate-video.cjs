@@ -130,30 +130,9 @@ async function uploadAudioToHeyGen(audioPath, apiKey) {
   return audioUrl;
 }
 
-// ── Step 2b: Get or create portrait avatar (uploaded once, cached in .env) ───
-async function getPortraitAvatarId(apiKey, env) {
-  // If already cached, return it
-  if (env.HEYGEN_THORN_PORTRAIT_ID) {
-    console.log('    Using cached portrait avatar ID:', env.HEYGEN_THORN_PORTRAIT_ID);
-    return env.HEYGEN_THORN_PORTRAIT_ID;
-  }
-
-  console.log('    No portrait avatar cached — creating portrait image and uploading to HeyGen...');
-
-  // Create portrait-padded image using ffmpeg (720x1280 with dark background)
-  const { execSync } = require('child_process');
-  const sourcePhoto = path.join(__dirname, '../dashboard/public/avatars/thorn.jpg');
-  const portraitPath = '/tmp/thorn-portrait-upload.jpg';
-
-  // Scale square avatar to fit portrait frame, pad remaining space with dark bg
-  execSync(
-    `ffmpeg -y -i "${sourcePhoto}" -vf "scale=720:720,pad=720:1280:0:280:color=0x0a0e1a" "${portraitPath}" -loglevel error`,
-    { stdio: 'pipe' }
-  );
-  console.log('    Portrait image created (720x1280)');
-
-  // Upload to HeyGen talking_photo endpoint
-  const fileBuffer = require('fs').readFileSync(portraitPath);
+// ── Step 2b: Upload a photo to HeyGen talking_photo and cache the ID ──────────
+async function uploadTalkingPhoto(apiKey, imagePath, envKey) {
+  const fileBuffer = require('fs').readFileSync(imagePath);
 
   const res = await new Promise((resolve, reject) => {
     const opts = {
@@ -176,24 +155,42 @@ async function getPortraitAvatarId(apiKey, env) {
     req.end();
   });
 
-  const portraitAvatarId = res?.data?.talking_photo_id || res?.talking_photo_id;
-  if (!portraitAvatarId) {
-    throw new Error('HeyGen portrait avatar upload failed: ' + JSON.stringify(res));
-  }
+  const avatarId = res?.data?.talking_photo_id || res?.talking_photo_id;
+  if (!avatarId) throw new Error(`HeyGen talking_photo upload failed: ${JSON.stringify(res)}`);
 
-  // Cache in .env for future calls
+  // Cache in .env
   const envContent = fs.readFileSync(ENV_FILE, 'utf8');
-  const updatedContent = envContent.includes('HEYGEN_THORN_PORTRAIT_ID=')
-    ? envContent.replace(/^HEYGEN_THORN_PORTRAIT_ID=.*$/m, `HEYGEN_THORN_PORTRAIT_ID=${portraitAvatarId}`)
-    : envContent + `\nHEYGEN_THORN_PORTRAIT_ID=${portraitAvatarId}`;
-  fs.writeFileSync(ENV_FILE, updatedContent);
+  const updated = envContent.includes(`${envKey}=`)
+    ? envContent.replace(new RegExp(`^${envKey}=.*$`, 'm'), `${envKey}=${avatarId}`)
+    : envContent + `\n${envKey}=${avatarId}`;
+  fs.writeFileSync(ENV_FILE, updated);
+  console.log(`    ${envKey} saved to .env: ${avatarId}`);
 
-  console.log('    Portrait avatar ID saved to .env:', portraitAvatarId);
+  return avatarId;
+}
 
-  // Cleanup temp file
-  try { require('fs').unlinkSync(portraitPath); } catch {}
+// ── Step 2c: Get portrait avatar (phone/9:16) — uses thorn-portrait-bg.jpg ───
+async function getPortraitAvatarId(apiKey, env) {
+  if (env.HEYGEN_THORN_PORTRAIT_ID) {
+    console.log('    Using cached portrait avatar ID:', env.HEYGEN_THORN_PORTRAIT_ID);
+    return env.HEYGEN_THORN_PORTRAIT_ID;
+  }
+  console.log('    Uploading Thorn portrait image to HeyGen...');
+  // Use the dedicated portrait image (phone frame) directly — no ffmpeg padding needed
+  const sourcePhoto = path.join(__dirname, '../dashboard/public/thorn-portrait-bg.jpg');
+  return uploadTalkingPhoto(apiKey, sourcePhoto, 'HEYGEN_THORN_PORTRAIT_ID');
+}
 
-  return portraitAvatarId;
+// ── Step 2d: Get landscape avatar (desktop/16:9) — uses thorn-landscape-bg.jpg ─
+async function getLandscapeAvatarId(apiKey, env) {
+  if (env.HEYGEN_THORN_LANDSCAPE_ID) {
+    console.log('    Using cached landscape avatar ID:', env.HEYGEN_THORN_LANDSCAPE_ID);
+    return env.HEYGEN_THORN_LANDSCAPE_ID;
+  }
+  console.log('    Uploading Thorn landscape image to HeyGen...');
+  // Use the dedicated landscape image (desktop frame) directly
+  const sourcePhoto = path.join(__dirname, '../dashboard/public/thorn-landscape-bg.jpg');
+  return uploadTalkingPhoto(apiKey, sourcePhoto, 'HEYGEN_THORN_LANDSCAPE_ID');
 }
 
 // ── Step 3: Create HeyGen video ──────────────────────────────────────────────
@@ -370,9 +367,9 @@ async function main() {
   if (!elevenKey)   missing.push('ELEVENLABS_API_KEY');
   if (!elevenVoice) missing.push('ELEVENLABS_VOICE_ID');
   if (!heygenKey)   missing.push('HEYGEN_API_KEY');
-  if (!avatarId)    missing.push('HEYGEN_THORN_AVATAR_ID (run: node scripts/setup-heygen-avatar.cjs)');
   if (!botToken)    missing.push('TELEGRAM_BOT_TOKEN');
   if (!chatId)      missing.push('ALLOWED_CHAT_ID');
+  // Avatar IDs are auto-uploaded on first use — no pre-setup required
 
   if (missing.length > 0) {
     console.error('Missing required env vars:');
@@ -408,9 +405,15 @@ async function main() {
   const audioPath = await generateAudio(scriptText, elevenKey, elevenVoice);
   const audioUrl  = await uploadAudioToHeyGen(audioPath, heygenKey);
 
-  // For portrait format, use a portrait-padded avatar to avoid black bars
-  let effectiveAvatarId = avatarId;
-  if (format === 'portrait') {
+  // Route to the correct Thorn avatar per format:
+  //   portrait  (phone/9:16)    → thorn-portrait-bg.jpg  → HEYGEN_THORN_PORTRAIT_ID
+  //   landscape (desktop/16:9)  → thorn-landscape-bg.jpg → HEYGEN_THORN_LANDSCAPE_ID
+  //   square    (1:1)           → portrait image (same character, different crop in post)
+  let effectiveAvatarId;
+  if (format === 'landscape') {
+    effectiveAvatarId = await getLandscapeAvatarId(heygenKey, env);
+  } else {
+    // portrait and square both use the portrait image
     effectiveAvatarId = await getPortraitAvatarId(heygenKey, env);
   }
 
