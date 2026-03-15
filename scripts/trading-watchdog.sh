@@ -93,8 +93,15 @@ except: print('error')
   fi
 
   # 3. Check for auth errors in recent logs (last 50 lines)
-  RECENT_LOGS=$(pm2 logs "$PM2_NAME" --lines 50 --nostream 2>/dev/null || echo "")
+  # Read directly from PM2 log files to avoid pm2 CLI header lines corrupting grep -c output
+  PM2_ERROR_LOG="${HOME}/.pm2/logs/${PM2_NAME}-error.log"
+  PM2_OUT_LOG="${HOME}/.pm2/logs/${PM2_NAME}-out.log"
+  RECENT_LOGS=""
+  [ -f "$PM2_ERROR_LOG" ] && RECENT_LOGS="$RECENT_LOGS$(tail -50 "$PM2_ERROR_LOG" 2>/dev/null)"
+  [ -f "$PM2_OUT_LOG" ] && RECENT_LOGS="$RECENT_LOGS$(tail -50 "$PM2_OUT_LOG" 2>/dev/null)"
   AUTH_ERROR=$(echo "$RECENT_LOGS" | grep -c "AuthenticationError\|-2015\|Invalid API-key\|IP.*permission" 2>/dev/null || echo "0")
+  # Ensure AUTH_ERROR is a single clean integer (strip any whitespace/newlines)
+  AUTH_ERROR=$(printf '%d' "${AUTH_ERROR}" 2>/dev/null || echo "0")
 
   if [ "$AUTH_ERROR" -gt "0" ]; then
     AUTH_ERRORS=$((AUTH_ERRORS + 1))

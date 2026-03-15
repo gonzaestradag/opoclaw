@@ -422,8 +422,12 @@ Loggea al menos: al inicio, después de cada búsqueda/análisis importante, y a
       // Notify Gonzalo only when a task truly can't be recovered
       import('child_process').then(({ exec }) => {
         const msg = `Tarea fallida sin recuperacion: "${task.title}" (asignada a ${meta.name}, ${MAX_RETRIES} intentos). Requiere atencion.`;
-        exec(`bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "${msg.replace(/"/g, "'")}"`, { timeout: 10000 }, () => {});
-      }).catch(() => {});
+        exec(`bash /Users/opoclaw1/claudeclaw/scripts/tg-notify.sh "${msg.replace(/"/g, "'")}"`, { timeout: 10000 }, (err) => {
+          if (err) console.error('[agent-worker] Failed to send task failure notification:', err);
+        });
+      }).catch((err) => {
+        console.error('[agent-worker] Failed to import child_process for notification:', err);
+      });
     }
 
     markAgentIdle(db3, task.assignee_id);

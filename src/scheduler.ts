@@ -23,7 +23,7 @@ type FileSender = (filePath: string, caption?: string) => Promise<void>;
 
 let sender: Sender;
 let fileSender: FileSender;
-let isRunning = false; // Guard against overlapping runs if tasks exceed 60s
+let currentRun: Promise<void> | null = null; // Atomic lock — prevents overlapping runs
 
 /**
  * Initialise the scheduler. Call once after the Telegram bot is ready.
@@ -40,23 +40,19 @@ export function initScheduler(send: Sender, sendFile?: FileSender): void {
 }
 
 async function runDueTasks(): Promise<void> {
-  if (isRunning) {
+  if (currentRun) {
     logger.warn('Scheduler: previous run still in progress, skipping this tick');
     return;
   }
-  isRunning = true;
   let tasks: ReturnType<typeof getDueTasks>;
   try {
     tasks = getDueTasks();
   } catch (err) {
-    logger.error({ err }, 'Scheduler: failed to fetch due tasks — resetting lock');
-    isRunning = false;
+    logger.error({ err }, 'Scheduler: failed to fetch due tasks');
     return;
   }
-  if (tasks.length === 0) {
-    isRunning = false;
-    return;
-  }
+  if (tasks.length === 0) return;
+  currentRun = (async () => {
 
   logger.info({ count: tasks.length }, 'Running due scheduled tasks');
 
@@ -159,7 +155,8 @@ async function runDueTasks(): Promise<void> {
       }
     }
   }
-  isRunning = false;
+  })().finally(() => { currentRun = null; });
+  await currentRun;
 }
 
 export function computeNextRun(cronExpression: string): number {

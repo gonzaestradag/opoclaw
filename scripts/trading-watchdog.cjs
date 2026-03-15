@@ -7,8 +7,8 @@ const { execSync, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const SCRIPT = '/Users/opoclaw1/opoclaw/scripts/trading-watchdog.sh';
-const LOG = '/Users/opoclaw1/opoclaw/logs/watchdog.log';
+const SCRIPT = '/Users/opoclaw1/claudeclaw/scripts/trading-watchdog.sh';
+const LOG = '/Users/opoclaw1/claudeclaw/logs/trading-watchdog.log';
 
 function log(msg) {
   const ts = new Date().toISOString();
