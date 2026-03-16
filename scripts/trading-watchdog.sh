@@ -45,22 +45,45 @@ log_db() {
     2>/dev/null || true
 }
 
-# ── Check current public IP ───────────────────────────────────
-CURRENT_IP=$(curl -s --max-time 5 https://api.ipify.org 2>/dev/null || echo "unknown")
+# ── Check current public IP (with debounce to avoid oscillation spam) ────────
+CURRENT_IP=$(curl -s --max-time 5 https://api.ipify.org 2>/dev/null || \
+             curl -s --max-time 5 https://checkip.amazonaws.com 2>/dev/null || echo "unknown")
 STORED_IP=""
 [ -f /tmp/last_known_ip ] && STORED_IP=$(cat /tmp/last_known_ip)
 
 if [ -n "$CURRENT_IP" ] && [ "$CURRENT_IP" != "unknown" ] && [ "$CURRENT_IP" != "$STORED_IP" ]; then
-  echo "$CURRENT_IP" > /tmp/last_known_ip
-  if [ -n "$STORED_IP" ]; then
-    # IP changed — this is likely why bots are failing
-    MSG="ALERTA: La IP del Mac Mini cambio de ${STORED_IP} a ${CURRENT_IP}. Esto rompe los bots de trading si tienen restriccion de IP en Binance. Ve a binance.com → API Management y agrega la nueva IP: ${CURRENT_IP}"
-    log "IP changed: $STORED_IP → $CURRENT_IP"
-    # send_tg "$MSG"  # Disabled — Gonzalo handles IP changes manually
-    log_db "IP del Mac Mini cambio a ${CURRENT_IP} — actualizar whitelist en Binance" "warning"
+  # New IP seen — require 3 consecutive checks with same IP before treating as real change
+  # This prevents oscillation spam when ipify returns different IPs on each call
+  PENDING_IP=""
+  PENDING_COUNT=0
+  [ -f /tmp/pending_ip_change ] && PENDING_IP=$(cat /tmp/pending_ip_change 2>/dev/null || echo "")
+  [ -f /tmp/pending_ip_count ]  && PENDING_COUNT=$(cat /tmp/pending_ip_count 2>/dev/null || echo "0")
+
+  if [ "$CURRENT_IP" = "$PENDING_IP" ]; then
+    PENDING_COUNT=$((PENDING_COUNT + 1))
+    echo "$PENDING_COUNT" > /tmp/pending_ip_count
   else
-    log "IP initialized: $CURRENT_IP"
+    echo "$CURRENT_IP" > /tmp/pending_ip_change
+    echo "1" > /tmp/pending_ip_count
+    PENDING_COUNT=1
   fi
+
+  if [ "$PENDING_COUNT" -ge "3" ]; then
+    # IP confirmed stable for 3 checks (~6 minutes) — treat as real change
+    echo "$CURRENT_IP" > /tmp/last_known_ip
+    rm -f /tmp/pending_ip_change /tmp/pending_ip_count
+    if [ -n "$STORED_IP" ]; then
+      log "IP changed (confirmed stable): $STORED_IP → $CURRENT_IP"
+      log_db "IP del Mac Mini cambio a ${CURRENT_IP} — actualizar whitelist en Binance" "warning"
+    else
+      log "IP initialized: $CURRENT_IP"
+    fi
+  else
+    log "IP possibly changing to $CURRENT_IP (pending confirmation: $PENDING_COUNT/3 — oscillation guard active)"
+  fi
+else
+  # IP matches stored — clear any pending debounce state
+  rm -f /tmp/pending_ip_change /tmp/pending_ip_count
 fi
 
 # ── Check each bot ────────────────────────────────────────────
